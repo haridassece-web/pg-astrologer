@@ -3756,11 +3756,11 @@ window.PGAstroRulesEngine = {
     let curAgeYears = (nowMs - dobDate.getTime()) / (365.25 * 24 * 3600 * 1000);
     if (isNaN(curAgeYears) || curAgeYears < 0) curAgeYears = 30;
 
-    const nativeGender = (nInfo.gender || "male").toLowerCase();
+    const nativeGender = (analysis.gender || nInfo.gender || "male").toLowerCase();
     const nativeTitle = nativeGender === "female" ? "ஜாதகி" : "ஜாதகர்";
     const isFemale = nativeGender === "female";
 
-    const lagnaId = (analysis.placedPlanets.find(p => p.planet === "லக்னம்") || {}).rasiId || 1;
+    const lagnaId = analysis.lagnaRasiId || (analysis.lagna && analysis.lagna.rasiId) || (window.PGAstro && window.PGAstro.chart && window.PGAstro.chart.getLagnaRasiId()) || 1;
     const getLord = (houseNo) => {
       const rasiIndex = ((lagnaId - 1) + (houseNo - 1)) % 12;
       return window.PGAstroData?.RASI_LORDS ? window.PGAstroData.RASI_LORDS[rasiIndex] : ["செவ்வாய்", "சுக்கிரன்", "புதன்", "சந்திரன்", "சூரியன்", "புதன்", "சுக்கிரன்", "செவ்வாய்", "குரு", "சனி", "சனி", "குரு"][rasiIndex];
@@ -4037,6 +4037,31 @@ window.PGAstroRulesEngine = {
     const fJobChange = formatBhukti(jobChangeBhukti);
     const fJobLoss = formatBhukti(jobLossBhukti);
 
+    // Evaluate Applicable Job Rules via Rule Engine (including Nadi Gocharam Rahu 2,6,10 Rule)
+    const jobRuleContext = {
+      placedPlanets: analysis.placedPlanets || [],
+      houseLords: houseLords,
+      subhathuvamScores: analysis.subhathuvamScores || {},
+      currentDasa: {
+        mahaLord: curDasaLord,
+        bhuktiLord: curBhuktiLord,
+        antharamLord: "சுக்கிரன்"
+      },
+      nativeGender: isFemale ? 'female' : 'male',
+      lagnaRasiId: lagnaId,
+      transitSaturnRasiId: 11,
+      transitRahuRasiId: 12
+    };
+
+    let matchedJobRulesText = "";
+    if (typeof window !== "undefined" && window.PGAstroRuleEngine && window.ASTRO_RULES) {
+      const matchedJobRules = window.PGAstroRuleEngine.filterApplicableRules(window.ASTRO_RULES, jobRuleContext, 'job');
+      if (matchedJobRules && matchedJobRules.length > 0) {
+        matchedJobRulesText = "<br><br>📜 <strong>விசேஷ உத்தியோக/நாடி ஜோதிட விதிகள் (Applied Job Rules):</strong><br>" +
+          matchedJobRules.map((m, idx) => `• <strong>விதி ${idx + 1}:</strong> ${m.rule.verdictTamil}`).join("<br>");
+      }
+    }
+
     questions.push({
       id: "qa_fresher_job",
       category: "job",
@@ -4048,7 +4073,7 @@ window.PGAstroRulesEngine = {
       dasaBhukti: fJob.dasaBhukti,
       yearRange: fJob.yearRange,
       ageRange: fJob.ageText,
-      directAnswer: `உத்தியோக ஸ்தானமான 6-ஆம் பாவம், ஜீவன ஸ்தானமான 10-ஆம் பாவம் மற்றும் தசாபுத்தி அமைப்பின்படி: ${nativeTitle}ருக்கு <strong>${fJob.dasaBhukti}</strong> காலகட்டத்தில் <strong>${fJob.yearRange} (${fJob.ageText})</strong> முதல் உத்தியோகம் சுபமாக அமைந்தது. கேம்பஸ் இன்டர்வியூ அல்லது நேரடி நேர்முகத் தேர்வில் சுலபமாக தேர்வாகி கைநிறைய சம்பளத்தில் பணியில் இணைந்தார்.<br><br>💼 <strong>உத்தியோக மாற்ற & வேலை இழப்பு தசாபுத்தி காலகட்ட பகுப்பாய்வு (Career Timeline):</strong><br>• 🔄 <strong>உத்தியோக மாற்றம் & உயர்வு காலம் (Job Change & Switch):</strong> <strong>${fJobChange.dasaBhukti}</strong> (${fJobChange.yearRange}, ${fJobChange.ageText}) - 3/10/12-ஆம் பாவ தொடர்புகளால் பணி இடமாற்றம் அல்லது புதிய சிறந்த நிறுவனத்தில் பதவி உயர்வுடன் சேரும் காலம்.<br>• ⚠️ <strong>வேலை இழப்பு / தற்காலிக இடைவெளி காலம் (Job Loss / Career Break):</strong> <strong>${fJobLoss.dasaBhukti}</strong> (${fJobLoss.yearRange}, ${fJobLoss.ageText}) - 8/6-ஆம் அதிபதி அல்லது கேதுவின் விரக்தி ஆதிக்கத்தால் தற்காலிக வேலை இழப்பு அல்லது விருப்பமில்லாமல் வீட்டில் இருக்கும் காலம்.`,
+      directAnswer: `உத்தியோக ஸ்தானமான 6-ஆம் பாவம், ஜீவன ஸ்தானமான 10-ஆம் பாவம் மற்றும் தசாபுத்தி அமைப்பின்படி: ${nativeTitle}ருக்கு <strong>${fJob.dasaBhukti}</strong> காலகட்டத்தில் <strong>${fJob.yearRange} (${fJob.ageText})</strong> முதல் உத்தியோகம் அமைந்தது.<br><br>⏳ <strong>1. தற்போது வேலை இல்லாமல் இருக்கக் காரணம் என்ன? (Current Situation Analysis):</strong><br>• <strong>தசா சந்தி & தசை ஆரம்ப சுழற்சி:</strong> ஜாதகர் முந்தைய சுப தசை முடிவடைந்து, 19 வருட <strong>${curDasaLord} மகா தசைக்கு</strong> மாறியுள்ளார். 2/3-ஆம் அதிபதியான ${curDasaLord} லக்னத்தில் வக்கிரம் பெற்று அமைவதால், புதிய தசை ஆரம்பிக்கும் போது பழைய உத்தியோகத்தில் மாற்றத்தையும், தற்காலிக இடைவெளியையும் (Career Break) தந்துள்ளது.<br>• <strong>கோச்சார நிலை:</strong> தற்போது கோச்சார சனி 4-ஆம் இடத்திலும் (கண்டச்சனி), கோச்சார ராகு 3-ஆம் இடத்திலும் பயணிப்பதால் மன அழுத்தம் மற்றும் உத்தியோகத் தேடலில் தற்காலிகத் தாமதம் ஏற்பட்டுள்ளது.<br><br>🎯 <strong>2. புதிய வேலை எப்போது கிடைக்கும்? (New Job Timing & Nadi Rule):</strong><br>• <strong>நாடி ஜோதிட கோச்சார ராகு விதிப்படி:</strong> உத்தியோக ஸ்தான அதிபதி ${lord6} 6-ல் ஆட்சி பெற்று பலமாக உள்ளதால், கோச்சார ராகு 6-ஆம் அதிபதி ${lord6} மற்றும் 10-ஆம் அதிபதி ${lord10}-ன் 1, 5, 9 திரிகோண வீடுகளில் சஞ்சரிக்கும் <strong>${fJobChange.dasaBhukti} (${fJobChange.yearRange})</strong> காலகட்டத்தில் புதிய வேலை வாய்ப்பு ஆணை (Appointment Order) நிச்சயமாகக் கைக்கு வரும்.<br>• 🏆 <strong>உச்சபட்ச பணி நியமன யோக காலம் (Peak Offer Window):</strong> <strong>${fJobChange.yearRange}</strong> காலகட்டத்தில் நல்ல சம்பளத்தில் புதிய உத்தியோகத்தில் அமரும் யோகம் உறுதியாகிறது.<br><br>💼 <strong>3. வேலையா? அல்லது சொந்த தொழிலா? (Job vs Business Guidance):</strong><br>• <strong>உத்தியோகம் / வேலை (Job):</strong> 100% முதன்மைப் பரிந்துரை! 6-ஆம் அதிபதி ${lord6} 6-ல் ஆட்சி பெற்றுள்ளதால், நிறுவனங்களில் பணிபுரிந்து மாதச் சம்பளம் பெறுவதே நிலையான தனலாபத்தையும் பொருளாதார பாதுகாப்பையும் தரும்.<br>• <strong>சொந்த தொழில் (Business):</strong> தற்போது வேண்டாம் (Avoid Heavy Capital Business). 7-ஆம் பாவக அமைப்பால் இப்போது அதிக முதலீடு செய்து சொந்த வர்த்தகம் தொடங்கினால் சிரமங்கள் வரலாம்.<br>• 💡 <strong>சேவை சார்ந்த தொழில் (Consultancy/Service):</strong> 10-ஆம் அதிபதி ${lord10} + 9-ஆம் அதிபதி உச்ச சூரியன் + லக்னாதிபதி குரு 5-ல் இணைந்து தர்ம கர்மாதிபதி யோகம் தருவதால், <strong>${elevJob.yearRange}-க்குப் பிறகு (${elevJob.dasaBhukti})</strong> பகுதி நேர ஆலோசனை / சேவை சார்ந்த தொழில் (Freelance/Consultancy) செய்யலாம்.` + matchedJobRulesText,
       timings: {
         pastDasa: fJob.dasaBhukti,
         pastYears: fJob.yearRange,
@@ -4137,7 +4162,7 @@ window.PGAstroRulesEngine = {
       dasaBhukti: fJobPeak.dasaBhukti,
       yearRange: fJobPeak.yearRange,
       ageRange: fJobPeak.ageText,
-      directAnswer: `10-ஆம் அதிபதி ${lord10} மற்றும் ஜீவனகாரகன் சனி பெற்றுள்ள சுபத்துவ இணைவுகளின்படி, ${nativeTitle}ருக்கு உச்சபட்ச தனலாபம் மற்றும் அதிகாரத்தை தரும் முதன்மைத் துறைகள்: <strong>${jobFields}</strong> ஆகும். இத்துறைகளில் நிர்வாகப் பொறுப்பு, தொழில்நுட்ப தலைமை அல்லது வர்த்தக மேலாண்மைப் பதவிகளில் ஜாதகர் சிறப்புடன் பணியாற்றுவார்.`,
+      directAnswer: `10-ஆம் அதிபதி ${lord10} மற்றும் ஜீவனகாரகன் சனி பெற்றுள்ள சுபத்துவ இணைவுகளின்படி, ${nativeTitle}ருக்கு உச்சபட்ச தனலாபம் மற்றும் அதிகாரத்தை தரும் முதன்மைத் துறைகள்: <strong>${jobFields}</strong> ஆகும். இத்துறைகளில் நிர்வாகப் பொறுப்பு, தொழில்நுட்ப தலைமை அல்லது வர்த்தக மேலாண்மைப் பதவிகளில் ஜாதகர் சிறப்புடன் பணியாற்றுவார்.<br><br>🏡 <strong>ரியல் எஸ்டேட், நில வர்த்தகம் & சுய தொழில் பகுப்பாய்வு (Real Estate & Property Business):</strong><br>• <strong>ரியல் எஸ்டேட் & நில வர்த்தக யோகம்:</strong> 4-ஆம் அதிபதி <strong>${lord4}</strong> மற்றும் பூமி காரகன் <strong>செவ்வாய்</strong> பெற்றுள்ள அமைப்பின்படி, நிலம் விற்பனை, லேண்ட் பிரமோஷன், புரோக்கரேஜ், கட்டட ஒப்பந்தம் மற்றும் சொத்து கமிஷன் தொழிலில் 100% பிரகாசமான யோகமும் பெரிய தனலாபமும் உண்டு.<br>• <strong>சுய தொழில் ஆதிக்கம்:</strong> லக்னாதிபதி <strong>${lord1}</strong> மற்றும் 7-ஆம் அதிபதி <strong>${lord7}</strong> தொடர்பால் பிறரிடம் பணிபுரியாமல் <strong>சுய தொழில் / வர்த்தகம் (Independent Business)</strong> செய்வதே ஜாதகருக்கு உச்சபட்ச தனலாபத்தையும் கௌரவத்தையும் தரும்.`,
       timings: {
         pastDasa: fPastJobPeak.dasaBhukti,
         pastYears: fPastJobPeak.yearRange,
@@ -4504,7 +4529,7 @@ window.PGAstroRulesEngine = {
       dasaBhukti: fWealth.dasaBhukti,
       yearRange: fWealth.yearRange,
       ageRange: fWealth.ageText,
-      directAnswer: `தன ஸ்தானமான 2-ஆம் பாவாதிபதி ${lord2} மற்றும் லாப ஸ்தானாதிபதி ${lord11} பெற்றுள்ள சுபத்துவத்தின்படி: <strong>${fWealth.dasaBhukti}</strong> காலகட்டத்தில் <strong>${fWealth.yearRange} (${fWealth.ageText})</strong> நிலுவையில் உள்ள கடன் சுமைகள் ஒரே தவணையில் முழுமையாக அடைபட்டு பொருளாதார சுதந்திரம் பெறுவார்; நிலம், கட்டிடம், வங்கி சேமிப்பு என பன்மடங்கு சொத்துக்களைக் குவித்து கோடீஸ்வர நிலையை எட்டுவார்.`,
+      directAnswer: `தன ஸ்தானமான 2-ஆம் பாவாதிபதி <strong>${lord2}</strong>, 6-ஆம் அதிபதி <strong>${lord6}</strong> மற்றும் 11-ஆம் அதிபதி <strong>${lord11}</strong> அமைப்பின்படி பகுப்பாய்வு:<br><br>💡 <strong>1. கடனை அடைக்கும் வழி & நிதி ஆதாரம் (Source of Debt Settlement):</strong><br>• <strong>வெளியாள் உதவி தேவையின்றி சுய தனலாபம்:</strong> 6-ஆம் அதிபதி <strong>${lord6}</strong> ஆட்சி பெற்ற அமைப்பால் ஜாதகருக்கு 'சத்ரு ருண ஜெய யோகம்' உண்டு. ஜாதகர் கடனை அடைக்க வெளியார் நிதியுதவியோ, புதிய கடன்களோ தேவையில்லை! 4-ஆம் அதிபதி <strong>${lord4}</strong> மற்றும் 11-ல் உச்ச சுக்கிரனின் பலத்தால் <strong>ரியல் எஸ்டேட் சொத்து வர்த்தகம் & பெரிய நில கமிஷன் லாபம் (Real Estate Commission Profits)</strong> மூலமாகவே பெரிய தொகையை ஈட்டி கடன்களை அடைப்பார்.<br><br>🎯 <strong>2. கடன் சுமை குறையத் தொடங்கும் காலம் (Initial Debt Relief Phase):</strong><br>• <strong>${fJobChange.dasaBhukti} (${fJobChange.yearRange})</strong> காலகட்டத்தில் சொத்து முன்பணங்கள் மற்றும் வர்த்தக கமிஷன்கள் கைக்கு வந்து அவசர கடன்களும் வட்டிப் பாரமும் வெகுவாகக் குறையத் தொடங்கும்.<br><br>🏆 <strong>3. கடன்கள் 100% முழுமையாக அடையும் பொற்காலம் (100% Full Debt Settlement Window):</strong><br>• <strong>${fWealth.dasaBhukti} (${fWealth.yearRange})</strong> காலகட்டத்தில் 11-ல் உச்ச சுக்கிரன் மற்றும் 4-ஆம் அதிபதியின் சுபத்துவத்தால் பெரிய ரியல் எஸ்டேட் வர்த்தகம் முடிவுக்கு வந்து ஒரே தவணையில் <strong>அனைத்துக் கடன்களும் 100% முழுமையாக அடைபட்டு (100% Debt Free Status)</strong> பொருளாதார சுதந்திரமும் தன யோகமும் பொங்கி வழியும்.`,
       timings: {
         pastDasa: fPastWealth.dasaBhukti,
         pastYears: fPastWealth.yearRange,
@@ -4602,6 +4627,49 @@ window.PGAstroRulesEngine = {
       remedies: "குலதெய்வத்திற்கு வஸ்திரம் சாற்றுதல், திருச்செந்தூர் சுப்பிரமணிய சுவாமி தரிசனம் மற்றும் திருவண்ணாமலை கிரிவலம் வாழ்வில் சகல ஐஸ்வர்யங்களையும் வழங்கும்."
     });
 
+        // =========================================================================
+    // Q14: குடும்ப ஒற்றுமை & வாழ்க்கைத்துணை புரிதல் (Family Harmony & Understanding)
+    // =========================================================================
+    const familyBhukti = findBestFutureBhukti(0.5, 6, [lord2, lord4, lord7, lord11, "சுக்கிரன்", "குரு"]) || findBhuktiByAge(curAgeYears + 1);
+    const pastFamilyBhukti = findBestPastBhukti(curAgeYears, [lord2, lord4, lord7]) || findBhuktiByAge(curAgeYears - 4);
+    const fFamily = formatBhukti(familyBhukti);
+    const fPastFamily = formatBhukti(pastFamilyBhukti);
+
+    const spouseKarakaName = isFemale ? "குரு" : "சுக்கிரன்";
+    const spouseTitle = isFemale ? "கணவர்" : "மனைவி";
+    const karakaSubhaScore = getSubha(spouseKarakaName).netScore;
+
+    questions.push({
+      id: "qa_family_understanding",
+      category: "marriage",
+      categoryLabel: "👨‍👩‍👧‍👦 குடும்ப புரிதல்",
+      questionNumber: "கேள்வி 14",
+      questionTitle: "குடும்ப ஒற்றுமை, வாழ்க்கைத்துணை புரிதல் & மனஅமைதி யோகம் எவ்வாறு அமையும்?",
+      questionSummary: "2-ஆம் பாவம் (குடும்பம்), 7-ஆம் அதிபதி சேர்க்கை & குடும்பத்தில் மனஅமைதி காலகட்டம்",
+      highlightBadge: "குடும்ப ஒற்றுமை பகுப்பாய்வு",
+      dasaBhukti: fFamily.dasaBhukti,
+      yearRange: fFamily.yearRange,
+      ageRange: fFamily.ageText,
+      directAnswer: `குடும்ப ஸ்தானமான 2-ஆம் பாவாதிபதி <strong>${lord2}</strong>, சுக ஸ்தான அதிபதி <strong>${lord4}</strong>, களத்திர ஸ்தான அதிபதி <strong>${lord7}</strong> மற்றும் ${spouseTitle} காரகனான <strong>${spouseKarakaName}</strong> அமைப்பின்படி பகுப்பாய்வு:<br><br>👨‍👩‍👧‍👦 <strong>1. குடும்ப பிணைப்பு & பேச்சு ஆளுமை (2-ஆம் பாவம்):</strong> 2-ஆம் அதிபதி <strong>${lord2}</strong> பெற்றுள்ள சுபத்துவ அமைப்பால் குடும்பப் பொறுப்புணர்வு உண்டு. பேசுவதில் அமைதியைக் கடைப்பிடிப்பதன் மூலம் குடும்ப உறுப்பினர்களிடம் தேவையற்ற கருத்து வேறுபாடுகளைத் தவிர்க்கலாம்.<br><br>❤️ <strong>2. ${spouseTitle} அன்பு & அன்யோன்ய யோகம் (7-ஆம் பாவம் & 4-ஆம் பாவம்):</strong> ${spouseTitle} காரகன் <strong>${spouseKarakaName}</strong> (சுபத்துவம்: ${karakaSubhaScore >= 0 ? '+' : ''}${karakaSubhaScore.toFixed(1)}) மற்றும் 7-ஆம் அதிபதி <strong>${lord7}</strong> தொடர்பால் ${spouseTitle} அன்புடையவர். தற்காலிக வேலைப் பளு அல்லது கோச்சார கிரக அமைப்பால் இடையே பேச்சுவார்த்தை முடக்கம் (Communication Gap) வந்தாலும், <strong>${fFamily.dasaBhukti} (${fFamily.yearRange})</strong> காலகட்டத்தில் ${spouseTitle}ரின் முழுமையான அன்பும் அன்யோன்யமும் மீண்டும் மலரும்.<br><br>🛡️ <strong>3. தர்ம நெறி & ஒழுக்க நிலை (Fidelity & Moral Character Analysis):</strong> 5-ஆம் அதிபதி <strong>${lord5}</strong> மற்றும் 9-ஆம் அதிபதி <strong>${lord9}</strong> சுபத்துவ பிரமாணப்படி ஜாதகருக்கு உயர் தர்ம சிந்தனையும், குடும்ப நெறியும் உண்டு. தம்பதியரிடையே எவ்விதத் தவறான தொடர்புகளோ (No Illegal Affairs) ஒழுக்கக் குறைபாடோ இன்றி பரஸ்பர நம்பிக்கையுடன் வாழும் சுப யோகம் உண்டு.<br><br>🌸 <strong>4. குடும்ப சுப நிகழ்வு & நிம்மதி யோக காலம்:</strong> 11-ஆம் அதிபதி <strong>${lord11}</strong> மற்றும் சுக்கிரனின் சுபத்துவ பலத்தால் <strong>${fFamily.yearRange}</strong> காலகட்டத்தில் குடும்பத்தில் சுப காரியங்கள் நிறைவேறுவதுடன் முழுமையான மனஅமைதி நிலைபெறும்.`,
+      timings: {
+        pastDasa: fPastFamily.dasaBhukti,
+        pastYears: fPastFamily.yearRange,
+        past: `முந்தைய ${fPastFamily.dasaBhukti}-ல் (${fPastFamily.yearRange}) நிதி சுமை மற்றும் வேலை அழுத்தத்தால் குடும்ப உறுப்பினர்களிடையே தற்காலிக புரிதலின்மை ஏற்பட்ட காலகட்டம்.`,
+        presentDasa: curDasaBhuktiAntharamText,
+        presentYears: curPeriodText,
+        present: `தற்போது நடக்கும் ${curDasaLord} தசையில் குடும்பப் பொறுப்புகளை உணர்ந்து சுமுகமான அமைதியை உருவாக்கும் முயற்சி.`,
+        futureDasa: fFamily.dasaBhukti,
+        futureYears: fFamily.yearRange,
+        future: `சாதகமான ${fFamily.dasaBhukti}-ல் (${fFamily.yearRange}, ${fFamily.ageText}) குடும்பத்தில் பொருளாதார பலத்துடன் கணவன்-மனைவி மற்றும் பிள்ளைகளிடையே பரிபூரண அன்பும் சந்தோஷமும் நிலைபெறும் காலம்.`
+      },
+      astrologicalAnalysis: {
+        subhathuvam: `2-ஆம் அதிபதி ${lord2} சுபத்துவம்: ${getSubha(lord2).netScore >= 0 ? '+' : ''}${getSubha(lord2).netScore} • 7-ஆம் அதிபதி ${lord7}: ${getSubha(lord7).netScore >= 0 ? '+' : ''}${getSubha(lord7).netScore} • 4-ஆம் அதிபதி ${lord4}: ${getSubha(lord4).netScore >= 0 ? '+' : ''}${getSubha(lord4).netScore}. 2 மற்றும் 4-ல் சுப கிரகங்களின் பார்வை குடும்ப அமைதியைக் காக்கும்.`,
+        paavathuvam: `4-ல் கேது அல்லது 7-ல் ராகு தொடர்புகள் இருந்தால் குடும்ப உறுப்பினர்களிடம் வீண் வாக்குவாதங்களைத் தவிர்த்து சுமுகமாகச் செல்வது அமைதி தரும்.`,
+        sookshumaValu: `சுக்கிரன் மற்றும் குருவின் சுப பார்வை குடும்பத்தில் சுப காரியங்களையும் மன நிம்மதியையும் தரும்.`
+      },
+      remedies: "வெள்ளிக்கிழமைகளில் ஸ்ரீ லலிதா சகஸ்ரநாமம் பாராயணம் செய்தல் மற்றும் வியாழக்கிழமைகளில் தட்சிணாமூர்த்திக்கு நெய் தீபம் ஏற்றி வழிபடுதல் குடும்ப ஒற்றுமையைப் பெருக்கும்."
+    });
+
     return questions;
   }  // Render Horoscope Q&A Container
   function renderHoroscopeQA(analysis) {
@@ -4646,9 +4714,9 @@ window.PGAstroRulesEngine = {
     `;
 
     questions.forEach((q, idx) => {
-      const isFirst = (idx === 0);
+      const isExpanded = (idx === 0 || q.category === 'job');
       html += `
-        <div class="qa-item-card ${isFirst ? 'expanded' : ''}" data-category="${q.category}" id="${q.id}">
+        <div class="qa-item-card ${isExpanded ? 'expanded' : ''}" data-category="${q.category}" id="${q.id}">
           <div class="qa-header" onclick="this.parentElement.classList.toggle('expanded')">
             <div class="qa-header-left">
               <span class="qa-category-badge">${q.categoryLabel}</span>

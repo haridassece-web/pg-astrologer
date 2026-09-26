@@ -189,6 +189,60 @@ window.PGAstroRuleEngine = (function () {
       }
     }
 
+    // 11. Nadi Astrology Job Rule: Gocharam Rahu 2,6,10 Nadi Rule (1,5,9 Trikonam to 2,6,10 Bhavas or 2,6,10 Lords)
+    if (conditions.nadiRahuJobRule || conditions.rahuTransit2_6_10_Connection) {
+      const transitRahuRasiId = context.transitRahuRasiId || 12; // Default Pisces (மீனம்)
+      const lord2Name = houseLords[2];
+      const lord6Name = houseLords[6];
+      const lord10Name = houseLords[10];
+
+      const house2Rasi = ((lagnaId - 1 + 2 - 1) % 12) + 1;
+      const house6Rasi = ((lagnaId - 1 + 6 - 1) % 12) + 1;
+      const house10Rasi = ((lagnaId - 1 + 10 - 1) % 12) + 1;
+
+      const targetBhavas = [
+        { house: 2, rasi: house2Rasi, label: "2-ஆம் பாவம் (தனம்/வருமானம்)" },
+        { house: 6, rasi: house6Rasi, label: "6-ஆம் பாவம் (உத்தியோகம்/வேலை)" },
+        { house: 10, rasi: house10Rasi, label: "10-ஆம் பாவம் (ஜீவன/தொழில்)" }
+      ];
+
+      let rahuBhavaMatch = false;
+      let rahuLordMatch = false;
+
+      // Check Rahu transit in 1, 5, 9 Trikonam to 2, 6, 10 Bhavas
+      targetBhavas.forEach(b => {
+        const dist = ((transitRahuRasiId - b.rasi + 12) % 12);
+        if (dist === 0 || dist === 4 || dist === 8) {
+          rahuBhavaMatch = true;
+          const trikLabel = dist === 0 ? "1-ஆம் பாவம் (நேரடி சஞ்சாரம்)" : (dist === 4 ? "5-ஆம் திரிகோணம்" : "9-ஆம் திரிகோணம்");
+          matchScore += 25;
+          matchReasons.push(`கோச்சார ராகு பகவான் ${b.label}-க்கு ${trikLabel} தொட்டு சஞ்சரிக்கிறார்`);
+        }
+      });
+
+      // Check Rahu transit in 1, 5, 9 Trikonam over 2, 6, 10 Lords (Athipathi)
+      [
+        { house: 2, name: lord2Name },
+        { house: 6, name: lord6Name },
+        { house: 10, name: lord10Name }
+      ].forEach(lordObj => {
+        if (lordObj.name && planetMap[lordObj.name]) {
+          const lordRasi = planetMap[lordObj.name].rasiId;
+          const dist = ((transitRahuRasiId - lordRasi + 12) % 12);
+          if (dist === 0 || dist === 4 || dist === 8) {
+            rahuLordMatch = true;
+            const trikLabel = dist === 0 ? "இணைவு (Direct Touch)" : (dist === 4 ? "5-ஆம் திரிகோண பார்வை" : "9-ஆம் திரிகோண பார்வை");
+            matchScore += 25;
+            matchReasons.push(`கோச்சார ராகு ${lordObj.house}-ஆம் அதிபதி ${lordObj.name} மீது ${trikLabel} சஞ்சாரம் செய்கிறார்`);
+          }
+        }
+      });
+
+      if (rahuBhavaMatch || rahuLordMatch) {
+        matchScore += 20;
+      }
+    }
+
     const minRequiredScore = rule.minApplicableScore || 15;
     const isApplicable = matchScore >= minRequiredScore;
 
