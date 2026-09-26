@@ -149,4 +149,20 @@
     color: #1f2937;
     white-space: pre-line;
   }
+
+  .print-astrologer-badge {
+    background: #fef3c7 !important;
+    border: 1.5px solid #b8860b !important;
+    color: #78350f !important;
+    font-size: 10pt !important;
+    font-weight: bold !important;
+  }
+
+  .print-footer {
+    margin-top: 1cm !important;
+    border-top: 1px solid #94a3b8 !important;
+    padding-top: 0.4cm !important;
+    font-size: 9.5pt !important;
+    color: #334155 !important;
+  }
 }

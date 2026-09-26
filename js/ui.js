@@ -694,6 +694,7 @@ window.PGAstroUI = window.PGAstroUI || {};
     const genderLabel = nativeGender === "female" ? "பெண் (Female)" : (nativeGender === "other" ? "மற்றவை (Other)" : "ஆண் (Male)");
     const nativeDob = document.getElementById("clientNativeDob")?.value || new Date().toLocaleDateString("ta-IN");
     const nativePlace = document.getElementById("clientNativePlace")?.value || "திருவண்ணாமலை (Tiruvannamalai)";
+    const astrologerName = document.getElementById("clientAstrologerName")?.value || "Haridass R";
     const container = document.getElementById("printableReportContent");
     if (!container) return;
 
@@ -726,11 +727,16 @@ window.PGAstroUI = window.PGAstroUI || {};
     });
     chartSummaryHtml += `</div>`;
 
+    const printDate = new Date().toLocaleDateString("ta-IN", { year: 'numeric', month: 'long', day: 'numeric' });
+
     container.innerHTML = `
-      <div style="text-align:center; margin-bottom:1rem; border-bottom:1px solid var(--gold-border); padding-bottom:0.8rem;">
-        <div style="color:var(--gold-light); font-size:0.9rem; font-weight:600;">பச்சையம்மன் துணை • கங்கையம்மன் துணை</div>
-        <h2 style="color:var(--gold-primary); font-size:1.4rem; margin:0.3rem 0;">PG ASTROLOGER - நாடி ஜோதிட அறிக்கை</h2>
-        <div style="font-size:0.85rem; color:var(--text-muted);">
+      <div style="text-align:center; margin-bottom:1rem; border-bottom:2px solid var(--gold-border); padding-bottom:0.8rem;" class="print-header">
+        <div style="color:var(--gold-light); font-size:0.92rem; font-weight:700;">பச்சையம்மன் துணை • கங்கையம்மன் துணை</div>
+        <h2 style="color:var(--gold-primary); font-size:1.45rem; margin:0.3rem 0; font-family:serif;">PG ASTROLOGER - நாடி ஜோதிட அறிக்கை</h2>
+        <div style="display:inline-block; background:rgba(212,175,55,0.15); border:1px solid #d4af37; border-radius:20px; padding:4px 18px; margin:0.3rem 0 0.5rem 0; font-size:0.9rem; font-weight:700; color:#ffd700;" class="print-astrologer-badge">
+          🔮 கணித்த ஜோதிடர் (Astrologer): <strong>${astrologerName}</strong>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.3rem;" class="print-native-info">
           ஜாதகர்: <strong>${nativeName}</strong> | பாலினம்: <strong>${genderLabel}</strong> | நாள் & நேரம்: <strong>${nativeDob}</strong> | 📍 பிறந்த இடம்: <strong>${nativePlace}</strong>
         </div>
       </div>
@@ -741,6 +747,16 @@ window.PGAstroUI = window.PGAstroUI || {};
       <h4 style="color:var(--gold-light); margin:1rem 0 0.4rem 0;">கண்டறியப்பட்ட முக்கிய இணைவுகள் & வழிகாட்டல்:</h4>
       <div id="printReportPredictions">
         ${document.getElementById("chartAnalysisContainer")?.innerHTML || "<p>கிரகங்களை அமைத்து பலன்களை அறியவும்.</p>"}
+      </div>
+
+      <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(212,175,55,0.3); display:flex; justify-content:space-between; align-items:center; font-size:0.84rem; color:var(--text-muted);" class="print-footer">
+        <div>
+          <span>PG ASTRO Nadi Astrology System</span> • <span>தேதி: ${printDate}</span>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-size:0.78rem; color:var(--text-muted);">கணித்த ஜோதிடர் கையொப்பம் (Astrologer Signature):</span><br>
+          <strong style="color:var(--gold-primary); font-size:1.05rem;">${astrologerName}</strong>
+        </div>
       </div>
     `;
   }
