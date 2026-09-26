@@ -158,11 +158,53 @@
     font-weight: bold !important;
   }
 
+  .print-charts-side-by-side {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.4cm !important;
+    margin-bottom: 0.6cm !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-chart-box {
+    background: #ffffff !important;
+    border: 1.5px solid #000000 !important;
+    box-shadow: none !important;
+  }
+
+  .print-cell {
+    background: #ffffff !important;
+    border: 1px solid #64748b !important;
+    color: #0f172a !important;
+  }
+
+  .print-cell div {
+    color: #0f172a !important;
+  }
+
+  .print-hub {
+    background: #f8fafc !important;
+    border: 1.5px solid #000000 !important;
+    color: #0f172a !important;
+  }
+
+  .print-prediction-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-prediction-card div {
+    color: #0f172a !important;
+  }
+
   .print-footer {
     margin-top: 1cm !important;
     border-top: 1px solid #94a3b8 !important;
     padding-top: 0.4cm !important;
     font-size: 9.5pt !important;
     color: #334155 !important;
+    page-break-inside: avoid !important;
   }
 }
