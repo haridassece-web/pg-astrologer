@@ -312,29 +312,29 @@ window.PGAstroRulesEngine = {
         nativeInfo
       });
 
-      // 8. Render complete evaluation results on 1st Page
-      renderEvaluationResults({
+      const analysisObj = {
         placedPlanets,
         detectedConjunctions,
         specialPlanets,
         subhathuvamResult,
         dashaResult,
         lifeMilestones,
-        nativeInfo
-      });
+        nativeInfo,
+        lagnaRasiId,
+        lagnaDegree,
+        chartState
+      };
+
+      // 8. Render complete evaluation results on 1st Page
+      renderEvaluationResults(analysisObj);
 
       // 9. Render Horoscope Q&A Page (Tab 7)
-      renderHoroscopeQA({
-        placedPlanets,
-        detectedConjunctions,
-        specialPlanets,
-        subhathuvamResult,
-        dashaResult,
-        lifeMilestones,
-        nativeInfo
-      });
+      renderHoroscopeQA(analysisObj);
+
+      return analysisObj;
     } catch (err) {
       console.error("Error evaluating chart in PGAstroEngine:", err);
+      return null;
     }
   }
 

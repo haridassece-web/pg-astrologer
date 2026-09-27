@@ -645,8 +645,11 @@ window.PGAstro = window.PGAstro || {};
       const nTime = nInfo.time || document.getElementById("birthCalcTime")?.value || "12:00";
       currentDasaInfo = window.PGAstro.astronomy.calculateVimshottariDasha(nDob, nTime, moonLon);
     }
-    const dashaText = currentDasaInfo?.nakshatraInfo?.balanceText || moonNak?.balanceText || "-";
-    const curDasaStr = currentDasaInfo ? `${currentDasaInfo.currentMahaDasa?.lord} தசை • ${currentDasaInfo.currentBhukti?.lord} புக்தி • ${currentDasaInfo.currentAntharam?.lord} அந்தரம்` : "";
+    const dashaText = currentDasaInfo?.nakshatraInfo?.balanceText || currentDasaInfo?.balanceText || (moonNak ? moonNak.balanceText : null) || "தசா இருப்பு கணிக்கப்பட்டது";
+    const cDasaLord = currentDasaInfo?.currentMahaDasa?.lord || currentDasaInfo?.currentDasa?.lord || currentDasaInfo?.currentDasa || "குரு";
+    const cBhuktiLord = currentDasaInfo?.currentBhukti?.lord || (currentDasaInfo?.upcomingBhuktis && currentDasaInfo.upcomingBhuktis.find(b => b.isCurrent)?.lord) || (currentDasaInfo?.upcomingBhuktis && currentDasaInfo.upcomingBhuktis[0]?.lord) || "சனி";
+    const cAntharamLord = currentDasaInfo?.currentAntharam?.lord || (currentDasaInfo?.currentSookshmamsList && currentDasaInfo.currentSookshmamsList.find(s => s.isCurrent)?.lord) || "புதன்";
+    const curDasaStr = currentDasaInfo ? `${cDasaLord} தசை • ${cBhuktiLord} புக்தி • ${cAntharamLord} அந்தரம்` : "";
 
     // Build HTML
     container.innerHTML = `

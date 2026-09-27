@@ -32,9 +32,15 @@ window.PGAstroUI = window.PGAstroUI || {};
   }
 
   function switchTab(tabId) {
+    let scrollToCalc = false;
+    if (tabId === "birth-calc") {
+      tabId = "chart";
+      scrollToCalc = true;
+    }
+
     // Update active tab buttons
     document.querySelectorAll(".nav-tab-btn, .mobile-nav-item").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.tab === tabId);
+      btn.classList.toggle("active", btn.dataset.tab === tabId || (scrollToCalc && btn.dataset.tab === "birth-calc"));
     });
 
     // Update tab panes
@@ -42,8 +48,18 @@ window.PGAstroUI = window.PGAstroUI || {};
       pane.classList.toggle("active", pane.id === `tab_${tabId}`);
     });
 
-    // Scroll top smoothly on mobile
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (scrollToCalc) {
+      setTimeout(() => {
+        const formEl = document.getElementById("birthCalcName") || document.getElementById("btnCalculateHoroscope");
+        if (formEl) {
+          formEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          document.getElementById("birthCalcName")?.focus();
+        }
+      }, 100);
+    } else {
+      // Scroll top smoothly on mobile
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }
 
   // 1.2. Theme & Style Switcher Setup
