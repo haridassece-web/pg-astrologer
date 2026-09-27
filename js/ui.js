@@ -724,7 +724,7 @@ window.PGAstroUI = window.PGAstroUI || {};
               <div style="font-size: 0.72rem; color: #94a3b8;">${isNavamsa ? 'D-9 நவாம்சம்' : 'D-1 ராசி சக்கரம்'}</div>
             </div>
           `;
-          centerRendered = True;
+          centerRendered = true;
         }
         return;
       }
