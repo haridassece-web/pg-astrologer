@@ -299,6 +299,98 @@ window.PGAstroRuleEngine = (function () {
       }
     }
 
+    // 17. Primary Subhathuvam Profession Rule Check (முதன்மை சுபத்துவ கிரக தொழில்)
+    if (conditions.primarySubhathuvamProfessionRule) {
+      let maxScore = -99;
+      let topSubhaPlanet = null;
+      Object.keys(subhaScores).forEach(pName => {
+        const scObj = subhaScores[pName];
+        const scVal = (scObj && scObj.netScore !== undefined) ? scObj.netScore : (typeof scObj === 'number' ? scObj : 0);
+        if (scVal > maxScore) {
+          maxScore = scVal;
+          topSubhaPlanet = pName;
+        }
+      });
+      if (topSubhaPlanet && maxScore >= 1.0) {
+        matchScore += 50;
+        matchReasons.push(`ஜாதகத்தில் ${topSubhaPlanet} பகவான் முதன்மை சுபத்துவ பலம் (+${maxScore.toFixed(1)}) பெற்றுள்ளதால், ${topSubhaPlanet}-ன் தொழில் & கல்வியே உச்சபட்ச யோகத்தையும் தனலாபத்தையும் தரும்`);
+      }
+    }
+
+    // 18. Speech Profession (2nd & 10th Connection) Check
+    if (conditions.speechProfessionRule) {
+      const lord10 = houseLords[10];
+      const lord2 = houseLords[2];
+      const lord10Pl = planetMap[lord10];
+      const lord2Pl = planetMap[lord2];
+      if ((lord10Pl && lord10Pl.house === 2) || (lord2Pl && lord2Pl.house === 10)) {
+        matchScore += 45;
+        matchReasons.push(`10-ஆம் அதிபதி ${lord10} 2-ஆம் பாவகத்துடனும், 2-ஆம் அதிபதி 10-ஆம் பாவகத்துடனும் தொடர்பு கொண்டு வாக்கினால் ஜீவிக்கும் (பேச்சுத் துறை) யோகம் தருகிறார்`);
+      }
+    }
+
+    // 19. 6th Lord in 10th House Service & Leadership Rule Check
+    if (conditions.lord6In10thRule) {
+      const lord6 = houseLords[6];
+      const lord6Pl = planetMap[lord6];
+      if (lord6Pl && lord6Pl.house === 10) {
+        matchScore += 45;
+        matchReasons.push(`6-ஆம் அதிபதி ${lord6} 10-ஆம் பாவகத்தில் அமர்ந்து உத்தியோகச் சேர்க்கை & மேலாண்மை/தலைமைப் பதவி யோகம் தருகிறார்`);
+      }
+    }
+
+    // 20. Rahu in 10th House Career Fluctuations Rule Check
+    if (conditions.rahu10thHouseRule) {
+      const rahuPl = planetMap["ராகு"];
+      const lord10 = houseLords[10];
+      const lord10Pl = planetMap[lord10];
+      if ((rahuPl && rahuPl.house === 10) || (rahuPl && lord10Pl && rahuPl.rasiId === lord10Pl.rasiId)) {
+        matchScore += 40;
+        matchReasons.push(`ராகு பகவான் 10-ஆம் பாவகத்தில் அல்லது 10-ஆம் அதிபதி ${lord10}-னுடன் இணைந்து தொழில் மாற்ற சுழற்சி தந்தாலும், ராகு தசையில் IT/வெளிநாட்டு தொழில் வளர்ச்சி தருகிறார்`);
+      }
+    }
+
+    // 21. Foreign Career (10-12 Parivarthana / 8-12 Connections) Check
+    if (conditions.foreignCareerRule) {
+      const lord10 = houseLords[10];
+      const lord12 = houseLords[12];
+      const lord8 = houseLords[8];
+      const lord10Pl = planetMap[lord10];
+      const lord12Pl = planetMap[lord12];
+      const isParivarthana = (lord10Pl && lord10Pl.house === 12) && (lord12Pl && lord12Pl.house === 10);
+      const curMaha = curDasa.mahaLord || curDasa.lord;
+      if (isParivarthana || curMaha === "ராகு" || curMaha === "கேது" || curMaha === lord12 || curMaha === lord8) {
+        matchScore += 45;
+        matchReasons.push(`10, 12-ஆம் பாவக பரிவர்த்தனை / 8, 12-ஆம் பாவ தொடர்புகளால் நீண்டகால வெளிநாட்டு உத்தியோகம் & அயல்நாட்டு தனலாப யோகம் கைகூடுகிறது`);
+      }
+    }
+
+    // 22. Stock Market & Trading Rule (6th lord in 11th, 11th lord in 10th with Lagna Lord)
+    if (conditions.stockMarketTradingRule) {
+      const lord6 = houseLords[6];
+      const lord11 = houseLords[11];
+      const lord1 = houseLords[1];
+      const lord6Pl = planetMap[lord6];
+      const lord11Pl = planetMap[lord11];
+      const lord1Pl = planetMap[lord1];
+      if ((lord6Pl && lord6Pl.house === 11) && (lord11Pl && lord11Pl.house === 10)) {
+        matchScore += 50;
+        matchReasons.push(`6-ஆம் அதிபதி 11-ல் அமர்ந்து 11-ஆம் அதிபதி 10-ல் அமர்வதால், பங்குச் சந்தை (Stock Market) & ஸ்பெகுலேஷன் வர்த்தகத்தில் பெரும் லாப யோகம் தருகிறார்`);
+      }
+    }
+
+    // 23. Weak Lagna Lord & Salaried Job Rule Check
+    if (conditions.weakLagnaStrong10thRule) {
+      const lord1 = houseLords[1];
+      const lord10 = houseLords[10];
+      const lord1Pl = planetMap[lord1];
+      const lord10Pl = planetMap[lord10];
+      if (lord1Pl && (lord1Pl.isDebilitated || lord1Pl.house === 6 || lord1Pl.house === 8 || lord1Pl.house === 12)) {
+        matchScore += 40;
+        matchReasons.push(`லக்னாதிபதி மறைவு/பலவீனத்தால் சொந்த தொழில் தவிர்த்து, நிறுவனங்களில் உத்தியோகம் புரிந்து மாதச் சம்பளம் ஈட்டுவதே நிலைத்த யோகம் தரும்`);
+      }
+    }
+
     const minRequiredScore = rule.minApplicableScore || 15;
     const isApplicable = matchScore >= minRequiredScore;
 

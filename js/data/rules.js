@@ -133,6 +133,88 @@ window.ASTRO_RULES = [
     weight: 90,
     minApplicableScore: 15,
     verdictTamil: "6-ஆம் பாவாதிபதி சுபத்துவம் அல்லது ஆட்சி பெறும் போது, நிதி நெருக்கடி, நிலுவைப் பணம், தரகர் ஏமாற்றப் பிரச்சனைகள் மற்றும் விவாகரத்து சட்ட வழக்குகள் காவல் துறை/நீதிமன்ற நடவடிக்கை மூலம் சாதகமாக முடிவுக்கு வரும்."
+  },
+
+  // =========================================================================
+  // MODERN CAREER & PROFESSION RULES (சுபத்துவ கோட்பாடு தொழில் விதிகள்)
+  // =========================================================================
+  {
+    id: "rule_subhathuvam_primary_profession",
+    category: "job",
+    name: "முதன்மை சுபத்துவ கிரகத்தின் தொழில் விதி (Primary Subhathuvam Profession Rule)",
+    conditions: {
+      primarySubhathuvamProfessionRule: true
+    },
+    weight: 98,
+    minApplicableScore: 15,
+    verdictTamil: "ஜாதகத்தில் எந்தக் கிரகம் குரு, சுக்கிரன், வளர்பிறைச் சந்திரன் சுபத்துவ தொடர்பால் முதன்மை சுபத்துவமாக உள்ளதோ, அந்தக் கிரகத்தின் கல்வியைப் படித்து அக் கிரகத்தின் தொழிலைச் செய்யும் போது அதிக வருமானமும் உச்சபட்ச யோகமும் கிட்டும்."
+  },
+  {
+    id: "rule_speech_profession_2nd_10th",
+    category: "job",
+    name: "2, 10-ஆம் பாவ தொடர்பு - வாக்கினால் ஜீவனம் & பேச்சுத் துறை யோகம் (Speech Profession Rule)",
+    conditions: {
+      speechProfessionRule: true
+    },
+    weight: 90,
+    minApplicableScore: 15,
+    verdictTamil: "10-ஆம் அதிபதி 2-ஆம் வீட்டில் அமர்ந்தோ அல்லது 2-ஆம் அதிபதி 10-ஆம் வீட்டில் இருந்தோ தொடர்பு கொண்டால், ஜாதகர் வாக்கினால் ஜீவிப்பார் (ஆசிரியர், வழக்கறிஞர், ஆலோசகர், மீடியா/டெலிபோன் பேச்சுத் துறை)."
+  },
+  {
+    id: "rule_6th_lord_in_10th_service",
+    category: "job",
+    name: "6-ஆம் அதிபதி 10-ல் அமர்வு - உத்தியோக பணி & தலைமை யோகம் (6th Lord in 10th Service Rule)",
+    conditions: {
+      lord6In10thRule: true
+    },
+    weight: 92,
+    minApplicableScore: 15,
+    verdictTamil: "6-ஆம் அதிபதி 10-ஆம் வீட்டில் அமர்வது நிறுவனங்களில் பணிபுரிவதற்குக் மிகச் சிறந்த அமைப்பாகும். அக்கிரகம் சுபத்துவமாக 10-ல் வலுப்பெற்றால் அதன் தசை/புக்தியில் தலைமைப் பொறுப்பான (Managerial/Executive) உயர் பதவி கிடைக்கும்."
+  },
+  {
+    id: "rule_rahu_in_10th_career_fluctuations",
+    category: "job",
+    name: "10-ல் ராகு / பத்தாதிபதியுடன் ராகு - தொழில் மாற்ற சுழற்சி (Rahu in 10th House Career Rule)",
+    conditions: {
+      rahu10thHouseRule: true
+    },
+    weight: 85,
+    minApplicableScore: 15,
+    verdictTamil: "10-ஆம் வீட்டில் ராகு தனித்து பாபத்துவமாக அமர்ந்தாலோ அல்லது 10-ஆம் அதிபதியுடன் ராகு சேர்ந்தாலோ நிரந்தரத் தொழில் அமைவதில் தாமதம் வரும். எனினும் ராகு தசையில் ராகுவின் காரகத்துவத் தொழில்கள் (IT, Net Business, Petroleum, Chemicals, Foreign) சிறப்பாக நடக்கும்."
+  },
+  {
+    id: "rule_10_12_parivarthana_foreign_career",
+    category: "job",
+    name: "10, 12 பரிவர்த்தனை & 8, 12 தொடர்பு - வெளிநாட்டு தொழில்/உத்தியோக யோகம் (Foreign Career Rule)",
+    conditions: {
+      foreignCareerRule: true
+    },
+    weight: 95,
+    minApplicableScore: 15,
+    verdictTamil: "10, 12-ஆம் அதிபதிகள் பரிவர்த்தனை அடைந்தாலோ அல்லது 8, 12-ஆம் அதிபதிகள் சுபத்துவ/சூட்சும வலுப்பெற்று ராகு/கேது தசைகள் நடைபெற்றாலோ ஜாதகர் நீடித்து வெளிநாட்டில் வசசித்து பெரும் தனலாபம் ஈட்டுவார்."
+  },
+  {
+    id: "rule_stock_market_speculation_6_11_10",
+    category: "job",
+    name: "6-ஆம் அதிபதி 11-ல், 11-ஆம் அதிபதி 10-ல் - பங்குச் சந்தை & ஸ்பெகுலேஷன் யோகம் (Stock Market & Trading Rule)",
+    conditions: {
+      stockMarketTradingRule: true
+    },
+    weight: 92,
+    minApplicableScore: 15,
+    verdictTamil: "6-ஆம் அதிபதி 11-ல் அமர்ந்து, 11-ஆம் அதிபதி 10-ஆம் வீட்டில் லக்னாதிபதியுடன் கூடி அமர்ந்தால், 6-ஆம் அதிபதி தசையில் பங்குச் சந்தை (Stock Market), ஷேர் டிரேடிங் மற்றும் ஸ்பெகுலேஷன் வழியில் பணம் கொட்டும்."
+  },
+  {
+    id: "rule_weak_lagna_strong_10th_service",
+    category: "job",
+    name: "லக்னாதிபதி பலவீனம் + 10/6-ஆம் அதிபதி தொடர்பு - பிறரிடம் பணிபுரியும் சேவை யோகம் (Salaried Job under Others Rule)",
+    conditions: {
+      weakLagnaStrong10thRule: true
+    },
+    weight: 88,
+    minApplicableScore: 15,
+    verdictTamil: "பத்தாதிபதி வலுவாகி லக்னாதிபதி பலவீனமானால் ஜாதகர் தனித்து சொந்த தொழில் செய்ய முடியாது; 6-ஆம் பாவக/அதிபதி தொடர்பால் பிறரின் நிறுவனங்களில் பணிபுரிந்து மாதச் சம்பளம் ஈட்டுவதே சிறந்தது."
   }
 ];
+
 

@@ -4037,6 +4037,59 @@ window.PGAstroRulesEngine = {
     const fJobChange = formatBhukti(jobChangeBhukti);
     const fJobLoss = formatBhukti(jobLossBhukti);
 
+    // Dasa duration map in years (Vimshottari Dasa)
+    const DASA_YEARS_MAP = {
+      "சூரியன்": 6,
+      "சந்திரன்": 10,
+      "செவ்வாய்": 7,
+      "ராகு": 18,
+      "குரு": 16,
+      "சனி": 19,
+      "புதன்": 17,
+      "கேது": 7,
+      "சுக்கிரன்": 20
+    };
+    const curDasaYears = DASA_YEARS_MAP[curDasaLord] || 19;
+
+    // Dynamic house lordship & placement for curDasaLord
+    const curDasaLordHouses = Object.keys(houseLords)
+      .filter(h => houseLords[h] === curDasaLord)
+      .join("/");
+    const curDasaLordHousesText = curDasaLordHouses ? `${curDasaLordHouses}-ஆம் அதிபதியான` : "சுப கிரகமான";
+
+    const curDasaPl = (analysis.placedPlanets || []).find(p => p.planet === curDasaLord);
+    const curDasaHouse = curDasaPl?.house || getPlanetAstroDetails(curDasaLord, analysis.placedPlanets, lagnaId).house;
+    const curDasaDignityText = curDasaPl?.isRetrograde ? "வக்கிரம் பெற்று" : (curDasaPl?.isExalted ? "உச்சம் பெற்று" : (curDasaPl?.isOwnHouse ? "ஆட்சி பெற்று" : "அமர்ந்து"));
+    const curDasaPlacementText = curDasaHouse ? `${curDasaHouse}-ஆம் பாவகத்தில் ${curDasaDignityText}` : `சுப அமைப்பில் ${curDasaDignityText}`;
+
+    // Dynamic Gocharam (Transit Saturn & Rahu) houses relative to Moon sign
+    const moonPl = (analysis.placedPlanets || []).find(p => p.planet === "சந்திரன்");
+    const moonRasiId = moonPl ? moonPl.rasiId : (lagnaId || 1);
+
+    const saturnHouseFromMoon = ((11 - moonRasiId + 12) % 12) + 1; // Current Transit Saturn in Aquarius (11)
+    let saturnGocharamText = `கோச்சார சனி ${saturnHouseFromMoon}-ஆம் இடத்தில் பயணிப்பதால்`;
+    if (saturnHouseFromMoon === 1) saturnGocharamText = "கோச்சார சனி ஜென்ம ராசியில் (ஜென்மச் சனி) பயணிப்பதால்";
+    else if (saturnHouseFromMoon === 2) saturnGocharamText = "கோச்சார சனி 2-ஆம் இடத்தில் (குடும்பச் சனி) பயணிப்பதால்";
+    else if (saturnHouseFromMoon === 4) saturnGocharamText = "கோச்சார சனி 4-ஆம் இடத்தில் (கண்டச் சனி) பயணிப்பதால்";
+    else if (saturnHouseFromMoon === 7) saturnGocharamText = "கோச்சார சனி 7-ஆம் இடத்தில் (கண்டச் சனி) பயணிப்பதால்";
+    else if (saturnHouseFromMoon === 8) saturnGocharamText = "கோச்சார சனி 8-ஆம் இடத்தில் (அஷ்டமச் சனி) பயணிப்பதால்";
+    else if (saturnHouseFromMoon === 12) saturnGocharamText = "கோச்சார சனி 12-ஆம் இடத்தில் (விரயச் சனி) பயணிப்பதால்";
+
+    const rahuHouseFromMoon = ((12 - moonRasiId + 12) % 12) + 1; // Current Transit Rahu in Pisces (12)
+    const rahuGocharamText = `கோச்சார ராகு ${rahuHouseFromMoon}-ஆம் இடத்தில் பயணிப்பதால்`;
+
+    // Dynamic Placement for lord6
+    const lord6Pl = (analysis.placedPlanets || []).find(p => p.planet === lord6);
+    const lord6House = lord6Pl?.house || getPlanetAstroDetails(lord6, analysis.placedPlanets, lagnaId).house;
+    const lord6Dignity = lord6Pl?.isExalted ? "உச்சம் பெற்று" : (lord6Pl?.isOwnHouse ? "ஆட்சி பெற்று" : "அமர்ந்து");
+    const lord6PlacementText = lord6House ? `${lord6House}-ல் ${lord6Dignity}` : "சுப பலம் பெற்று";
+
+    // Dynamic Placement for lord9 & lord1
+    const lord9Pl = (analysis.placedPlanets || []).find(p => p.planet === lord9);
+    const lord9Dignity = lord9Pl?.isExalted ? `உச்ச ${lord9}` : (lord9Pl?.isOwnHouse ? `ஆட்சி ${lord9}` : lord9);
+    const lord1Pl = (analysis.placedPlanets || []).find(p => p.planet === lord1);
+    const lord1House = lord1Pl?.house ? `${lord1Pl.house}-ல்` : "";
+
     // Evaluate Applicable Job Rules via Rule Engine (including Nadi Gocharam Rahu 2,6,10 Rule)
     const jobRuleContext = {
       placedPlanets: analysis.placedPlanets || [],
@@ -4073,7 +4126,7 @@ window.PGAstroRulesEngine = {
       dasaBhukti: fJob.dasaBhukti,
       yearRange: fJob.yearRange,
       ageRange: fJob.ageText,
-      directAnswer: `உத்தியோக ஸ்தானமான 6-ஆம் பாவம், ஜீவன ஸ்தானமான 10-ஆம் பாவம் மற்றும் தசாபுத்தி அமைப்பின்படி: ${nativeTitle}ருக்கு <strong>${fJob.dasaBhukti}</strong> காலகட்டத்தில் <strong>${fJob.yearRange} (${fJob.ageText})</strong> முதல் உத்தியோகம் அமைந்தது.<br><br>⏳ <strong>1. தற்போது வேலை இல்லாமல் இருக்கக் காரணம் என்ன? (Current Situation Analysis):</strong><br>• <strong>தசா சந்தி & தசை ஆரம்ப சுழற்சி:</strong> ஜாதகர் முந்தைய சுப தசை முடிவடைந்து, 19 வருட <strong>${curDasaLord} மகா தசைக்கு</strong> மாறியுள்ளார். 2/3-ஆம் அதிபதியான ${curDasaLord} லக்னத்தில் வக்கிரம் பெற்று அமைவதால், புதிய தசை ஆரம்பிக்கும் போது பழைய உத்தியோகத்தில் மாற்றத்தையும், தற்காலிக இடைவெளியையும் (Career Break) தந்துள்ளது.<br>• <strong>கோச்சார நிலை:</strong> தற்போது கோச்சார சனி 4-ஆம் இடத்திலும் (கண்டச்சனி), கோச்சார ராகு 3-ஆம் இடத்திலும் பயணிப்பதால் மன அழுத்தம் மற்றும் உத்தியோகத் தேடலில் தற்காலிகத் தாமதம் ஏற்பட்டுள்ளது.<br><br>🎯 <strong>2. புதிய வேலை எப்போது கிடைக்கும்? (New Job Timing & Nadi Rule):</strong><br>• <strong>நாடி ஜோதிட கோச்சார ராகு விதிப்படி:</strong> உத்தியோக ஸ்தான அதிபதி ${lord6} 6-ல் ஆட்சி பெற்று பலமாக உள்ளதால், கோச்சார ராகு 6-ஆம் அதிபதி ${lord6} மற்றும் 10-ஆம் அதிபதி ${lord10}-ன் 1, 5, 9 திரிகோண வீடுகளில் சஞ்சரிக்கும் <strong>${fJobChange.dasaBhukti} (${fJobChange.yearRange})</strong> காலகட்டத்தில் புதிய வேலை வாய்ப்பு ஆணை (Appointment Order) நிச்சயமாகக் கைக்கு வரும்.<br>• 🏆 <strong>உச்சபட்ச பணி நியமன யோக காலம் (Peak Offer Window):</strong> <strong>${fJobChange.yearRange}</strong> காலகட்டத்தில் நல்ல சம்பளத்தில் புதிய உத்தியோகத்தில் அமரும் யோகம் உறுதியாகிறது.<br><br>💼 <strong>3. வேலையா? அல்லது சொந்த தொழிலா? (Job vs Business Guidance):</strong><br>• <strong>உத்தியோகம் / வேலை (Job):</strong> 100% முதன்மைப் பரிந்துரை! 6-ஆம் அதிபதி ${lord6} 6-ல் ஆட்சி பெற்றுள்ளதால், நிறுவனங்களில் பணிபுரிந்து மாதச் சம்பளம் பெறுவதே நிலையான தனலாபத்தையும் பொருளாதார பாதுகாப்பையும் தரும்.<br>• <strong>சொந்த தொழில் (Business):</strong> தற்போது வேண்டாம் (Avoid Heavy Capital Business). 7-ஆம் பாவக அமைப்பால் இப்போது அதிக முதலீடு செய்து சொந்த வர்த்தகம் தொடங்கினால் சிரமங்கள் வரலாம்.<br>• 💡 <strong>சேவை சார்ந்த தொழில் (Consultancy/Service):</strong> 10-ஆம் அதிபதி ${lord10} + 9-ஆம் அதிபதி உச்ச சூரியன் + லக்னாதிபதி குரு 5-ல் இணைந்து தர்ம கர்மாதிபதி யோகம் தருவதால், <strong>${elevJob.yearRange}-க்குப் பிறகு (${elevJob.dasaBhukti})</strong> பகுதி நேர ஆலோசனை / சேவை சார்ந்த தொழில் (Freelance/Consultancy) செய்யலாம்.` + matchedJobRulesText,
+      directAnswer: `உத்தியோக ஸ்தானமான 6-ஆம் பாவம், ஜீவன ஸ்தானமான 10-ஆம் பாவம் மற்றும் தசாபுத்தி அமைப்பின்படி: ${nativeTitle}ருக்கு <strong>${fJob.dasaBhukti}</strong> காலகட்டத்தில் <strong>${fJob.yearRange} (${fJob.ageText})</strong> முதல் உத்தியோகம் அமைந்தது.<br><br>⏳ <strong>1. தற்போது வேலை இல்லாமல் இருக்கக் காரணம் என்ன? (Current Situation Analysis):</strong><br>• <strong>தசா சந்தி & தசை ஆரம்ப சுழற்சி:</strong> ஜாதகர் முந்தைய சுப தசை முடிவடைந்து, ${curDasaYears} வருட <strong>${curDasaLord} மகா தசைக்கு</strong> மாறியுள்ளார். ${curDasaLordHousesText} ${curDasaLord} ${curDasaPlacementText} அமைவதால், புதிய தசை ஆரம்பிக்கும் போது பழைய உத்தியோகத்தில் மாற்றத்தையும், தற்காலிக இடைவெளியையும் (Career Break) தந்துள்ளது.<br>• <strong>கோச்சார நிலை:</strong> தற்போது ${saturnGocharamText} மற்றும் ${rahuGocharamText} மன அழுத்தம் மற்றும் உத்தியோகத் தேடலில் தற்காலிகத் தாமதம் ஏற்பட்டுள்ளது.<br><br>🎯 <strong>2. புதிய வேலை எப்போது கிடைக்கும்? (New Job Timing & Nadi Rule):</strong><br>• <strong>நாடி ஜோதிட கோச்சார ராகு விதிப்படி:</strong> உத்தியோக ஸ்தான அதிபதி ${lord6} ${lord6PlacementText} பலமாக உள்ளதால், கோச்சார ராகு 6-ஆம் அதிபதி ${lord6} மற்றும் 10-ஆம் அதிபதி ${lord10}-ன் 1, 5, 9 திரிகோண வீடுகளில் சஞ்சரிக்கும் <strong>${fJobChange.dasaBhukti} (${fJobChange.yearRange})</strong> காலகட்டத்தில் புதிய வேலை வாய்ப்பு ஆணை (Appointment Order) நிச்சயமாகக் கைக்கு வரும்.<br>• 🏆 <strong>உச்சபட்ச பணி நியமன யோக காலம் (Peak Offer Window):</strong> <strong>${fJobChange.yearRange}</strong> காலகட்டத்தில் நல்ல சம்பளத்தில் புதிய உத்தியோகத்தில் அமரும் யோகம் உறுதியாகிறது.<br><br>💼 <strong>3. வேலையா? அல்லது சொந்த தொழிலா? (Job vs Business Guidance):</strong><br>• <strong>உத்தியோகம் / வேலை (Job):</strong> 100% முதன்மைப் பரிந்துரை! 6-ஆம் அதிபதி ${lord6} ${lord6PlacementText} உள்ளதால், நிறுவனங்களில் பணிபுரிந்து மாதச் சம்பளம் பெறுவதே நிலையான தனலாபத்தையும் பொருளாதார பாதுகாப்பையும் தரும்.<br>• <strong>சொந்த தொழில் (Business):</strong> தற்போது வேண்டாம் (Avoid Heavy Capital Business). 7-ஆம் பாவக அமைப்பால் இப்போது அதிக முதலீடு செய்து சொந்த வர்த்தகம் தொடங்கினால் சிரமங்கள் வரலாம்.<br>• 💡 <strong>சேவை சார்ந்த தொழில் (Consultancy/Service):</strong> 10-ஆம் அதிபதி ${lord10} + 9-ஆம் அதிபதி ${lord9Dignity} + லக்னாதிபதி ${lord1} ${lord1House} இணைந்து சுப யோகம் தருவதால், <strong>${elevJob.yearRange}-க்குப் பிறகு (${elevJob.dasaBhukti})</strong> பகுதி நேர ஆலோசனை / சேவை சார்ந்த தொழில் (Freelance/Consultancy) செய்யலாம்.` + matchedJobRulesText,
       timings: {
         pastDasa: fJob.dasaBhukti,
         pastYears: fJob.yearRange,
@@ -4151,6 +4204,30 @@ window.PGAstroRulesEngine = {
     const fJobPeak = formatBhukti(jobPeakBhukti);
     const fPastJobPeak = formatBhukti(pastJobPeakBhukti);
 
+    // Dynamic Primary Subhathuvam Planet & Profession mapping (Guruji Aditya Guruji Subhathuvam Theory)
+    const PLANET_PROFESSIONS_MAP = {
+      "சூரியன்": "அரசு பணிகள், நிர்வாகம், தலைமைப் பொறுப்புகள், அரசியல், மருத்துவம், மின்சாரம், எலெக்ட்ரிக்கல் சாமான்கள்",
+      "சந்திரன்": "திரவம், உணவு, மளிகை, கலைகள், அரிசி/தானியம், பால், வெளிநாடு, நீர் நிலைத் துறைகள், டிராவல்ஸ்",
+      "செவ்வாய்": "சீருடைப் பணிகள் (Police/Military), ரியல் எஸ்டேட், கட்டிடம்/சிவில், இன்ஜினியரிங், நெருப்பு/கேஸ்/டீக்கடை, விளையாட்டு, மருத்துவம்",
+      "புதன்": "ஐ.டி (IT), சாப்ட்வேர், ஆடிட்டிங், கணக்கு, கல்வி, ஜோதிடம், மீடியா, விளம்பரம், எழுத்து, வியாபாரம், தரகு, கம்ப்யூட்டர்",
+      "குரு": "வங்கி (Banking), நிதி (Finance), ஆசிரியர்/கல்வி, சட்டம்/நீதிபதி, ஆன்மீகம், தங்கம்/நகைக் கடை, அறக்கட்டளை, ஆராய்ச்சி",
+      "சுக்கிரன்": "சினிமா, மீடியா, ஆடை/ஜவுளி, கார்/வாகனம், அழகுக்கலை, ஆடம்பரம், ஓட்டல், பெண்கள் உபயோகப் பொருட்கள், வெள்ளி",
+      "சனி": "இயந்திரங்கள்/ஆலைகள், இரும்பு, சிமெண்ட், தார், பெட்ரோல்/எண்ணெய், தோல்/செருப்பு, பழைய பொருட்கள், துப்புரவு, பரிசோதனை கூடம், லாரி/போக்குவரத்து",
+      "ராகு": "பங்குச் சந்தை (Stock Market), ஐ.டி (IT), இன்டர்நெட் வர்த்தகம், கெமிக்கல், பெட்ரோலியம், காயலான், வெளிநாட்டு பணிகள், பாஸ்ட் புட்",
+      "கேது": "மருத்துவம்/பாரம்பரிய வைத்தியம், சட்டம், தையல், எலக்ட்ரானிக்ஸ், வெல்டிங், ஆன்மீக பணி, ஹீலிங்"
+    };
+
+    let maxSubhaVal = -99;
+    let topSubhaPlanet = "புதன்";
+    ["சூரியன்", "சந்திரன்", "செவ்வாய்", "புதன்", "குரு", "சுக்கிரன்", "சனி", "ராகு", "கேது"].forEach(pName => {
+      const sc = getSubha(pName).netScore;
+      if (sc > maxSubhaVal) {
+        maxSubhaVal = sc;
+        topSubhaPlanet = pName;
+      }
+    });
+    const topSubhaProfessions = PLANET_PROFESSIONS_MAP[topSubhaPlanet] || jobFields;
+
     questions.push({
       id: "qa_job_field",
       category: "job",
@@ -4162,7 +4239,7 @@ window.PGAstroRulesEngine = {
       dasaBhukti: fJobPeak.dasaBhukti,
       yearRange: fJobPeak.yearRange,
       ageRange: fJobPeak.ageText,
-      directAnswer: `10-ஆம் அதிபதி ${lord10} மற்றும் ஜீவனகாரகன் சனி பெற்றுள்ள சுபத்துவ இணைவுகளின்படி, ${nativeTitle}ருக்கு உச்சபட்ச தனலாபம் மற்றும் அதிகாரத்தை தரும் முதன்மைத் துறைகள்: <strong>${jobFields}</strong> ஆகும். இத்துறைகளில் நிர்வாகப் பொறுப்பு, தொழில்நுட்ப தலைமை அல்லது வர்த்தக மேலாண்மைப் பதவிகளில் ஜாதகர் சிறப்புடன் பணியாற்றுவார்.<br><br>🏡 <strong>ரியல் எஸ்டேட், நில வர்த்தகம் & சுய தொழில் பகுப்பாய்வு (Real Estate & Property Business):</strong><br>• <strong>ரியல் எஸ்டேட் & நில வர்த்தக யோகம்:</strong> 4-ஆம் அதிபதி <strong>${lord4}</strong> மற்றும் பூமி காரகன் <strong>செவ்வாய்</strong> பெற்றுள்ள அமைப்பின்படி, நிலம் விற்பனை, லேண்ட் பிரமோஷன், புரோக்கரேஜ், கட்டட ஒப்பந்தம் மற்றும் சொத்து கமிஷன் தொழிலில் 100% பிரகாசமான யோகமும் பெரிய தனலாபமும் உண்டு.<br>• <strong>சுய தொழில் ஆதிக்கம்:</strong> லக்னாதிபதி <strong>${lord1}</strong> மற்றும் 7-ஆம் அதிபதி <strong>${lord7}</strong> தொடர்பால் பிறரிடம் பணிபுரியாமல் <strong>சுய தொழில் / வர்த்தகம் (Independent Business)</strong> செய்வதே ஜாதகருக்கு உச்சபட்ச தனலாபத்தையும் கௌரவத்தையும் தரும்.`,
+      directAnswer: `10-ஆம் அதிபதி ${lord10} மற்றும் ஜீவனகாரகன் சனி பெற்றுள்ள சுபத்துவ இணைவுகளின்படி, ${nativeTitle}ருக்கு உச்சபட்ச தனலாபம் மற்றும் அதிகாரத்தை தரும் முதன்மைத் துறைகள்: <strong>${jobFields}</strong> ஆகும். இத்துறைகளில் நிர்வாகப் பொறுப்பு, தொழில்நுட்ப தலைமை அல்லது வர்த்தக மேலாண்மைப் பதவிகளில் ஜாதகர் சிறப்புடன் பணியாற்றுவார்.<br><br>🌟 <strong>சுபத்துவ கோட்பாடு தொழில் முதன்மை விதி (Primary Subhathuvam Profession Rule):</strong><br>ஜாதகத்தில் <strong>${topSubhaPlanet}</strong> பகவான் உச்சபட்ச சுபத்துவ பலம் (<strong>+${maxSubhaVal.toFixed(1)} புள்ளிகள்</strong>) பெற்றுள்ளதால், சுபத்துவ கோட்பாட்டுப் பிரமாணப்படி: <strong>${topSubhaPlanet}-ன் காரகத்துவத் தொழில்களான (${topSubhaProfessions})</strong> ஜாதகருக்கு உச்சபட்ச செல்வச் செழிப்பையும், அழியாத புகழையும், நிரந்தர தனலாபத்தையும் நல்கும்.<br><br>🏡 <strong>ரியல் எஸ்டேட், நில வர்த்தகம் & சுய தொழில் பகுப்பாய்வு (Real Estate & Property Business):</strong><br>• <strong>ரியல் எஸ்டேட் & நில வர்த்தக யோகம்:</strong> 4-ஆம் அதிபதி <strong>${lord4}</strong> மற்றும் பூமி காரகன் <strong>செவ்வாய்</strong> பெற்றுள்ள அமைப்பின்படி, நிலம் விற்பனை, லேண்ட் பிரமோஷன், புரோக்கரேஜ், கட்டட ஒப்பந்தம் மற்றும் சொத்து கமிஷன் தொழிலில் 100% பிரகாசமான யோகமும் பெரிய தனலாபமும் உண்டு.<br>• <strong>சுய தொழில் ஆதிக்கம்:</strong> லக்னாதிபதி <strong>${lord1}</strong> மற்றும் 7-ஆம் அதிபதி <strong>${lord7}</strong> தொடர்பால் பிறரிடம் பணிபுரியாமல் <strong>சுய தொழில் / வர்த்தகம் (Independent Business)</strong> செய்வதே ஜாதகருக்கு உச்சபட்ச தனலாபத்தையும் கௌரவத்தையும் தரும்.`,
       timings: {
         pastDasa: fPastJobPeak.dasaBhukti,
         pastYears: fPastJobPeak.yearRange,
