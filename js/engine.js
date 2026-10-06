@@ -183,9 +183,16 @@ window.PGAstroRulesEngine = {
 };
 
 (function() {
+  let lastAnalysisObj = null;
+  let isEvaluating = false;
+
   function evaluateCurrentChart() {
+    if (isEvaluating) {
+      return lastAnalysisObj;
+    }
+    isEvaluating = true;
     try {
-      if (!window.PGAstro || !window.PGAstro.chart) return;
+      if (!window.PGAstro || !window.PGAstro.chart) return null;
       const chartState = window.PGAstro.chart.getState();
       const RASIS = (window.PGAstro.chart && window.PGAstro.chart.RASIS) || [];
       const nativeInfo = window.PGAstro.chart.getNativeInfo();
@@ -325,16 +332,25 @@ window.PGAstroRulesEngine = {
         chartState
       };
 
+      lastAnalysisObj = analysisObj;
+
       // 8. Render complete evaluation results on 1st Page
       renderEvaluationResults(analysisObj);
 
       // 9. Render Horoscope Q&A Page (Tab 7)
       renderHoroscopeQA(analysisObj);
 
+      // 10. Render Vedic & Nadi Bhava Timeline Page (Tab 9)
+      if (window.PGAstroBhavaEngine && typeof window.PGAstroBhavaEngine.render === "function") {
+        window.PGAstroBhavaEngine.render(analysisObj);
+      }
+
       return analysisObj;
     } catch (err) {
-      console.error("Error evaluating chart in PGAstroEngine:", err);
+      console.error("Error evaluating chart in PGAstroEngine:", err, err.stack);
       return null;
+    } finally {
+      isEvaluating = false;
     }
   }
 
@@ -3215,8 +3231,8 @@ window.PGAstroRulesEngine = {
     if (analysis.dashaResult) {
       const d = analysis.dashaResult;
       const nak = d.nakshatraInfo;
-      const mahaLord = d.currentMahaDasa.lord;
-      const dashaPred = window.PGAstroData.specialRules.dasha[mahaLord]?.text || "";
+      const mahaLord = d.currentMahaDasa?.lord || d.currentDasa?.lord || "குரு";
+      const dashaPred = window.PGAstroData?.specialRules?.dasha?.[mahaLord]?.text || "";
 
       html += `
         <div class="dasa-dashboard-card">
@@ -4903,6 +4919,7 @@ window.PGAstroRulesEngine = {
   window.PGAstroEngine = {
     evaluateHoroscopeQA: evaluateHoroscopeQA,
     renderHoroscopeQA: renderHoroscopeQA,
-    evaluateCurrentChart: evaluateCurrentChart
+    evaluateCurrentChart: evaluateCurrentChart,
+    getLastAnalysisObj: () => lastAnalysisObj
   };
 })();

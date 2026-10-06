@@ -17,6 +17,9 @@ window.PGAstroUI = window.PGAstroUI || {};
     setupClock();
     setupHoroscopeQA();
     renderActiveDasaBhuktiAntharam();
+    if (window.PGAstroBhavaEngine) {
+      window.PGAstroBhavaEngine.render();
+    }
   }
 
   // 1. Tab Navigation (Top desktop + Mobile bottom bar)
@@ -47,6 +50,10 @@ window.PGAstroUI = window.PGAstroUI || {};
     document.querySelectorAll(".tab-pane").forEach(pane => {
       pane.classList.toggle("active", pane.id === `tab_${tabId}`);
     });
+
+    if (tabId === "bhava-timeline" && window.PGAstroBhavaEngine) {
+      window.PGAstroBhavaEngine.render();
+    }
 
     if (scrollToCalc) {
       setTimeout(() => {
