@@ -96,7 +96,7 @@ window.PGAstroAuth = (function() {
 
     if (statusEl) {
       statusEl.style.color = 'var(--ruby-fire)';
-      statusEl.textContent = '❌ தவறான அணுகல் குறியீடு! 💡 எ.கா: ADMIN123 அல்லது PAID2026';
+      statusEl.textContent = '❌ தவறான அணுகல் குறியீடு! (Invalid Passcode)';
     }
     if (window.PGAstroUI && window.PGAstroUI.showToast) {
       window.PGAstroUI.showToast('❌ தவறான அணுகல் குறியீடு (Invalid Passcode)');

@@ -702,15 +702,12 @@
             1. அணுகல் குறியீடு உள்ளிடுக (Passcode Login):
           </label>
           <div style="display:flex; gap:0.5rem;">
-            <input type="text" id="accessPasscodeInput" placeholder="எ.கா: ADMIN123 அல்லது PAID2026" style="flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); padding:0.5rem 0.7rem; border-radius:var(--radius-sm); color:#fff; font-size:0.9rem;">
+            <input type="password" id="accessPasscodeInput" placeholder="அணுகல் குறியீட்டை உள்ளிடவும் (Passcode)..." style="flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); padding:0.5rem 0.7rem; border-radius:var(--radius-sm); color:#fff; font-size:0.9rem;">
             <button class="btn btn-gold" id="btnSubmitAccessCode" onclick="window.PGAstroAuth &amp;&amp; window.PGAstroAuth.loginWithCode(document.getElementById('accessPasscodeInput').value)">
               <span>🔓</span> உள்நுழைக
             </button>
           </div>
           <div id="accessModalStatus" style="font-size:0.82rem; margin-top:0.45rem; font-weight:600;"></div>
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.45rem; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px;">
-            💡 குறிப்பு: Admin Passcode: <code style="color:var(--gold-primary);">ADMIN123</code> | Paid Passcode: <code style="color:#38bdf8;">PAID2026</code>
-          </div>
         </div>
 
         <!-- 2. Direct Role Switcher (For Testing & Demo) -->
