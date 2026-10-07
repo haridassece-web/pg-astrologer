@@ -839,6 +839,8 @@ window.PGAstroUI = window.PGAstroUI || {};
     const container = document.getElementById("printableReportContent");
     if (!container) return;
 
+    const isFullAccess = !window.PGAstroAuth || window.PGAstroAuth.isPaid() || window.PGAstroAuth.isAdmin();
+
     const chartState = window.PGAstro.chart.getState();
     const lagnaId = window.PGAstro.chart.getLagnaRasiId();
     const lagnaDeg = window.PGAstro.chart.getLagnaDegree();
@@ -850,38 +852,164 @@ window.PGAstroUI = window.PGAstroUI || {};
     const rasiChartHtml = buildSouthIndianGridHtml("ராசிக் கட்டம்", chartState, lagnaId, lagnaDeg, false);
     const navamsaChartHtml = buildSouthIndianGridHtml("நவாம்சக் கட்டம்", navamsaMap, navLagnaId, null, true);
 
-    // Get current analysis and all 14 milestone Q&A predictions
+    const currentAnalysis = (window.PGAstroEngine && typeof window.PGAstroEngine.evaluateCurrentChart === 'function') ? window.PGAstroEngine.evaluateCurrentChart() : null;
+
+    // 1. Planetary Degrees & Saram Table HTML
+    let degreesTableHtml = "";
+    if (isFullAccess && chartState) {
+      const RASIS = window.PGAstro?.chart?.RASIS || [];
+      const PLANETS = window.PGAstro?.chart?.PLANETS || [];
+      const formatDeg = window.PGAstro?.chart?.formatDegree || ((d) => d + "°");
+
+      const placedPlanetsList = [];
+      PLANETS.forEach(p => {
+        for (let rid in chartState) {
+          const found = (chartState[rid] || []).find(item => item.planet === p.name);
+          if (found) {
+            placedPlanetsList.push({ planet: p.name, degree: found.degree });
+            break;
+          }
+        }
+      });
+
+      const karakaData = window.PGAstro?.astronomy?.calculateCharaKarakas(placedPlanetsList) || { charaMap: {}, sthiraMap: {} };
+
+      let rowsHtml = "";
+      if (lagnaId) {
+        const rasi = RASIS.find(r => r.id === lagnaId);
+        const lagnaTotalLon = (lagnaId - 1) * 30 + (lagnaDeg || 0);
+        const lagnaNak = window.PGAstro?.astronomy?.getNakshatraPadaSaram(lagnaTotalLon);
+        rowsHtml += `
+          <tr style="background:#fefce8; font-weight:bold;">
+            <td>🌅 லக்கினம்</td>
+            <td>${rasi ? rasi.name : '-'}</td>
+            <td>${formatDeg(lagnaDeg, true)}</td>
+            <td>${lagnaNak ? lagnaNak.nakshatra : '-'}</td>
+            <td>${lagnaNak ? lagnaNak.pada + '-ஆம் பாதம்' : '-'}</td>
+            <td>${lagnaNak ? lagnaNak.lord + ' சாரம்' : '-'}</td>
+            <td>உதய லக்கினம்</td>
+          </tr>
+        `;
+      }
+
+      PLANETS.forEach(p => {
+        let placed = null;
+        let placedRasiId = null;
+        for (let rid in chartState) {
+          const found = (chartState[rid] || []).find(item => item.planet === p.name);
+          if (found) {
+            placed = found;
+            placedRasiId = parseInt(rid);
+            break;
+          }
+        }
+        if (!placed || !placedRasiId) return;
+
+        const rasi = RASIS.find(r => r.id === placedRasiId);
+        const totalLon = (placedRasiId - 1) * 30 + (placed.degree || 0);
+        const nakInfo = window.PGAstro?.astronomy?.getNakshatraPadaSaram(totalLon);
+        const charaK = karakaData.charaMap[p.name] || "-";
+        let statusStr = "";
+        if (placed.isRetrograde) statusStr += " [வக்கிரம்]";
+        if (placed.isExalted) statusStr += " [உச்சம்]";
+        if (placed.isDebilitated) statusStr += " [நீசம்]";
+
+        rowsHtml += `
+          <tr>
+            <td style="font-weight:600;">${p.name}</td>
+            <td>${rasi ? rasi.name : '-'}</td>
+            <td>${formatDeg(placed.degree, true)} ${statusStr}</td>
+            <td>${nakInfo ? nakInfo.nakshatra : '-'}</td>
+            <td>${nakInfo ? nakInfo.pada + '-ஆம் பாதம்' : '-'}</td>
+            <td>${nakInfo ? nakInfo.lord + ' சாரம்' : '-'}</td>
+            <td>${charaK}</td>
+          </tr>
+        `;
+      });
+
+      degreesTableHtml = `
+        <div style="margin-bottom:0.8rem; page-break-inside:avoid;" class="print-prediction-card">
+          <h4 style="color:#854d0e; font-size:0.92rem; font-weight:bold; margin-bottom:0.3rem;">
+            📐 கிரக நிலைகள், நட்சத்திர சாரம் &amp; காரகங்கள் (Planetary Positions &amp; Karakas)
+          </h4>
+          <table style="width:100%; border-collapse:collapse; font-size:7.5pt; text-align:left;" border="1" cellPadding="3">
+            <thead style="background:#f1f5f9; color:#0f172a;">
+              <tr>
+                <th>கிரகம்</th>
+                <th>ராசி</th>
+                <th>பாகை</th>
+                <th>நட்சத்திரம்</th>
+                <th>பாதம்</th>
+                <th>சார நாதன் (Saram)</th>
+                <th>சர காரகம்</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // 2. Subhathuvam Summary HTML
+    let subhathuvamHtml = "";
+    if (isFullAccess && currentAnalysis && currentAnalysis.subhathuvamScores) {
+      const scores = currentAnalysis.subhathuvamScores;
+      let scoresListHtml = "";
+      for (let pName in scores) {
+        const s = scores[pName];
+        if (!s) continue;
+        const scoreVal = s.totalScore || s.score || 0;
+        const statusText = scoreVal >= 70 ? "✨ சுபத்துவம் மேலோங்கியது" : scoreVal >= 50 ? "🌟 மிதமான சுபத்துவம்" : "⚖️ சாதாரண நிலை";
+        scoresListHtml += `
+          <div style="font-size:7.5pt; padding:3px 6px; border:1px solid #e2e8f0; border-radius:3px; background:#fff;">
+            <strong>${pName}:</strong> ${scoreVal}/100 (${statusText})
+          </div>
+        `;
+      }
+      subhathuvamHtml = `
+        <div style="margin-bottom:0.8rem; page-break-inside:avoid;" class="print-prediction-card">
+          <h4 style="color:#854d0e; font-size:0.92rem; font-weight:bold; margin-bottom:0.3rem;">
+            ✨ சுபத்துவம் &amp; சூட்சும வலு பகுப்பாய்வு (Subhathuvam Summary)
+          </h4>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px;">
+            ${scoresListHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    // 3. Get all 14 milestone Q&A predictions
     let allPredictionsHtml = "";
-    if (window.PGAstroEngine && typeof window.PGAstroEngine.evaluateCurrentChart === 'function') {
-      const currentAnalysis = window.PGAstroEngine.evaluateCurrentChart();
+    if (isFullAccess && window.PGAstroEngine && typeof window.PGAstroEngine.evaluateHoroscopeQA === 'function' && currentAnalysis) {
       const questions = window.PGAstroEngine.evaluateHoroscopeQA(currentAnalysis);
-      
       if (questions && questions.length > 0) {
         allPredictionsHtml += `
-          <div class="print-qa-all-section" style="margin-top:1rem; page-break-before: auto;">
-            <h3 style="color:#d4af37; border-bottom:2px solid #d4af37; padding-bottom:6px; font-size:1.15rem; margin-bottom:0.8rem; display:flex; align-items:center; gap:0.4rem;">
-              <span>📜</span> ஜாதகக் கேள்வி-பதில் முழுமையான பலன்கள் (All Milestone Life Predictions):
+          <div class="print-qa-all-section" style="margin-top:0.8rem; page-break-before: auto;">
+            <h3 style="color:#854d0e; border-bottom:2px solid #854d0e; padding-bottom:4px; font-size:1.1rem; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.4rem;">
+              <span>📜</span> ஜாதகக் கேள்வி-பதில் 14 முக்கிய வாழ்க்கை பலன்கள் (Complete Milestone Life Predictions):
             </h3>
-            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
         `;
         
         questions.forEach(q => {
           allPredictionsHtml += `
-            <div style="border:1px solid rgba(212,175,55,0.4); border-radius:6px; padding:0.65rem 0.85rem; background:#0f1526; page-break-inside:avoid;" class="print-prediction-card">
-              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:4px; margin-bottom:6px;">
-                <div style="font-weight:700; color:#ffd700; font-size:0.92rem;">
-                  <span style="background:rgba(212,175,55,0.2); border:1px solid #d4af37; border-radius:4px; padding:1px 6px; font-size:0.75rem; margin-right:6px;">${q.questionNumber}</span>
+            <div style="border:1px solid #cbd5e1; border-left:3.5px solid #b8860b; border-radius:4px; padding:0.5rem 0.75rem; background:#fff; page-break-inside:avoid;" class="print-prediction-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #cbd5e1; padding-bottom:3px; margin-bottom:4px;">
+                <div style="font-weight:700; color:#1e1b4b; font-size:0.9rem;">
+                  <span style="background:#fef3c7; border:1px solid #b8860b; border-radius:3px; padding:1px 5px; font-size:0.72rem; margin-right:5px; color:#78350f;">${q.questionNumber}</span>
                   ${q.questionTitle}
                 </div>
-                <div style="font-size:0.75rem; color:#38bdf8; font-weight:600;">
+                <div style="font-size:0.75rem; color:#0284c7; font-weight:600;">
                   🪐 ${q.dasaBhukti} (${q.yearRange})
                 </div>
               </div>
-              <div style="font-size:0.82rem; line-height:1.5; color:#e2e8f0; margin-bottom:6px;">
+              <div style="font-size:0.82rem; line-height:1.45; color:#1e293b; margin-bottom:4px;">
                 ${q.directAnswer}
               </div>
               ${q.remedies ? `
-                <div style="font-size:0.78rem; color:#f59e0b; background:rgba(245,158,11,0.1); border-left:3px solid #f59e0b; padding:4px 8px; border-radius:3px;">
+                <div style="font-size:0.76rem; color:#854d0e; background:#fefce8; border-left:3px solid #b8860b; padding:3px 6px; border-radius:3px;">
                   🕉️ <strong>பரிகாரம் &amp; வழிகாட்டல்:</strong> ${q.remedies}
                 </div>
               ` : ''}
@@ -891,11 +1019,26 @@ window.PGAstroUI = window.PGAstroUI || {};
         
         allPredictionsHtml += `</div></div>`;
       }
+    } else if (!isFullAccess) {
+      allPredictionsHtml = `
+        <div style="margin:1rem 0; padding:1.2rem; text-align:center; border:2px dashed #b8860b; border-radius:8px; background:#fefce8;" class="print-prediction-card">
+          <div style="font-size:2rem; margin-bottom:0.3rem;">🔒</div>
+          <h3 style="color:#854d0e; font-size:1.1rem; margin-bottom:0.3rem;">
+            முழுமையான ஜாதக அச்சு அறிக்கை (Full Client Consultation Report)
+          </h3>
+          <p style="color:#4b5563; font-size:0.85rem; max-width:550px; margin:0 auto 0.8rem;">
+            14 முக்கிய வாழ்க்கை பலன்கள், நட்சத்திர சாரம் &amp; பாகை அட்டவணை, சுபத்துவம் &amp; சூட்சும வலு அறிக்கை, மற்றும் தசா புக்தி விபரங்கள் அடங்கிய முழு அறிக்கையை அச்சிட <strong>Paid User</strong> அல்லது <strong>Admin</strong> ஆக உள்நுழையவும்.
+          </p>
+          <button class="btn btn-gold" onclick="window.PGAstroAuth &amp;&amp; window.PGAstroAuth.showAccessModal('qa')">
+            🔑 அணுகல் பெற / லாக் இன்
+          </button>
+        </div>
+      `;
     }
 
     const printDate = new Date().toLocaleDateString("ta-IN", { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // Generate Dynamic Nadi Report Card using buildDynamicNadiReport
+    // Dynamic Nadi Guidance Card
     let nadiCardHtml = "";
     const nadiFn = window.buildDynamicNadiReport || (typeof buildDynamicNadiReport === "function" ? buildDynamicNadiReport : null);
     if (typeof nadiFn === "function") {
@@ -907,26 +1050,23 @@ window.PGAstroUI = window.PGAstroUI || {};
       }
 
       let dasaPeriodsList = [];
-      if (window.PGAstroEngine && typeof window.PGAstroEngine.evaluateCurrentChart === 'function') {
-        const curAn = window.PGAstroEngine.evaluateCurrentChart();
-        if (curAn && curAn.dashaResult && curAn.dashaResult.upcomingBhuktis) {
-          dasaPeriodsList = curAn.dashaResult.upcomingBhuktis.map(b => ({
-            dasa: curAn.dashaResult.currentMahaDasa?.lord || "நடப்பு தசை",
-            bhukti: b.lord,
-            startDate: b.startDate,
-            endDate: b.endDate
-          }));
-        }
+      if (currentAnalysis && currentAnalysis.dashaResult && currentAnalysis.dashaResult.upcomingBhuktis) {
+        dasaPeriodsList = currentAnalysis.dashaResult.upcomingBhuktis.map(b => ({
+          dasa: currentAnalysis.dashaResult.currentMahaDasa?.lord || "நடப்பு தசை",
+          bhukti: b.lord,
+          startDate: b.startDate,
+          endDate: b.endDate
+        }));
       }
 
       const nadiReport = nadiFn(lagnaId, planetRasisObj, dasaPeriodsList);
       if (nadiReport) {
         nadiCardHtml = `
-          <div style="border:1.5px solid #d4af37; background:#0b0f19; border-radius:8px; padding:0.85rem 1rem; margin-bottom:1rem;" class="nadi-dynamic-card">
-            <h3 style="color:#ffd700; font-size:1.05rem; font-family:serif; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:4px; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.4rem;">
+          <div style="border:1.5px solid #b8860b; background:#fafaf9; border-radius:6px; padding:0.65rem 0.85rem; margin-bottom:0.8rem; page-break-inside:avoid;" class="nadi-dynamic-card">
+            <h3 style="color:#854d0e; font-size:1.02rem; font-family:serif; border-bottom:1px solid #d4af37; padding-bottom:3px; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;">
               <span>⚡</span> நாடி ஜோதிட உத்தியோக &amp; தொழில் வழிகாட்டல் (Dynamic Nadi Report)
             </h3>
-            <div style="font-size:0.84rem; line-height:1.55; color:#e2e8f0; display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="font-size:0.82rem; line-height:1.5; color:#1e293b; display:flex; flex-direction:column; gap:0.35rem;">
               <div>🎯 <strong>புதிய வேலை வாய்ப்பு விதி:</strong> ${nadiReport.newJobRule}</div>
               <div>🏆 <strong>பணி ஆணை யோக காலம்:</strong> ${nadiReport.peakOfferWindow}</div>
               <div>💼 <strong>உத்தியோக பரிந்துரை:</strong> ${nadiReport.jobRecommendation}</div>
@@ -939,13 +1079,13 @@ window.PGAstroUI = window.PGAstroUI || {};
     }
 
     container.innerHTML = `
-      <div style="text-align:center; margin-bottom:0.8rem; border-bottom:2px solid var(--gold-border); padding-bottom:0.6rem;" class="print-header">
-        <div style="color:var(--gold-light); font-size:1.05rem; font-weight:800; letter-spacing:0.5px;">ஸ்ரீ பச்சையம்மன் துணை • ஸ்ரீ கங்கையம்மன் துணை</div>
-        <h2 style="color:var(--gold-primary); font-size:1.45rem; margin:0.2rem 0; font-family:serif;">PG ASTROLOGER - நாடி ஜோதிட அறிக்கை</h2>
-        <div style="display:inline-block; background:rgba(212,175,55,0.15); border:1px solid #d4af37; border-radius:20px; padding:3px 18px; margin:0.2rem 0 0.4rem 0; font-size:0.88rem; font-weight:700; color:#ffd700;" class="print-astrologer-badge">
+      <div style="text-align:center; margin-bottom:0.6rem; border-bottom:2px solid #854d0e; padding-bottom:0.5rem;" class="print-header">
+        <div style="color:#854d0e; font-size:1rem; font-weight:800; letter-spacing:0.5px;">ஸ்ரீ பச்சையம்மன் துணை • ஸ்ரீ கங்கையம்மன் துணை</div>
+        <h2 style="color:#1e1b4b; font-size:1.4rem; margin:0.15rem 0; font-family:serif;">PG ASTROLOGER - நாடி ஜோதிட அறிக்கை</h2>
+        <div style="display:inline-block; background:#fef3c7; border:1px solid #b8860b; border-radius:20px; padding:2px 16px; margin:0.2rem 0; font-size:0.86rem; font-weight:700; color:#78350f;" class="print-astrologer-badge">
           🔮 கணித்த ஜோதிடர் (Astrologer): <strong>${astrologerName}</strong>
         </div>
-        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.2rem;" class="print-native-info">
+        <div style="font-size:0.84rem; color:#334155; margin-top:0.2rem;" class="print-native-info">
           ஜாதகர்: <strong>${nativeName}</strong> | பாலினம்: <strong>${genderLabel}</strong> | நாள் & நேரம்: <strong>${nativeDob}</strong> | 📍 பிறந்த இடம்: <strong>${nativePlace}</strong>
         </div>
       </div>
@@ -954,33 +1094,34 @@ window.PGAstroUI = window.PGAstroUI || {};
       ${nadiCardHtml}
 
       <!-- Side by Side Rasi (D1) & Navamsa (D9) Chart Grids -->
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:1rem;" class="print-charts-side-by-side">
+      <div class="print-charts-side-by-side">
         <div>
-          <h4 style="color:var(--gold-light); font-size:0.85rem; text-align:center; margin-bottom:0.3rem;">ராசிக் கட்டம் (Rasi Chart - D1)</h4>
+          <h4>ராசிக் கட்டம் (Rasi Chart - D1)</h4>
           ${rasiChartHtml}
         </div>
         <div>
-          <h4 style="color:var(--gold-light); font-size:0.85rem; text-align:center; margin-bottom:0.3rem;">நவாம்சக் கட்டம் (Navamsa Chart - D9)</h4>
+          <h4>நவாம்சக் கட்டம் (Navamsa Chart - D9)</h4>
           ${navamsaChartHtml}
         </div>
       </div>
 
+      <!-- Planetary Degrees, Nakshatra, Pada & Saram Table -->
+      ${degreesTableHtml}
+
+      <!-- Subhathuvam Summary -->
+      ${subhathuvamHtml}
+
       <!-- All Life Milestone Predictions -->
-      ${allPredictionsHtml || `
-        <h4 style="color:var(--gold-light); margin:1rem 0 0.4rem 0;">கண்டறியப்பட்ட முக்கிய இணைவுகள் & வழிகாட்டல்:</h4>
-        <div id="printReportPredictions">
-          ${document.getElementById("chartAnalysisContainer")?.innerHTML || "<p>கிரகங்களை அமைத்து பலன்களை அறியவும்.</p>"}
-        </div>
-      `}
+      ${allPredictionsHtml}
 
       <!-- Official Footer Signature Block -->
-      <div style="margin-top:1.8rem; padding-top:0.8rem; border-top:1px solid rgba(212,175,55,0.3); display:flex; justify-content:space-between; align-items:center; font-size:0.84rem; color:var(--text-muted);" class="print-footer">
+      <div style="margin-top:1.2rem; padding-top:0.6rem; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; color:#475569;" class="print-footer">
         <div>
           <span>PG ASTRO Nadi Astrology System</span> • <span>தேதி: ${printDate}</span>
         </div>
         <div style="text-align:right;">
-          <span style="font-size:0.78rem; color:var(--text-muted);">கணித்த ஜோதிடர் கையொப்பம் (Astrologer Signature):</span><br>
-          <strong style="color:var(--gold-primary); font-size:1.05rem;">${astrologerName}</strong>
+          <span style="font-size:0.75rem; color:#64748b;">கணித்த ஜோதிடர் கையொப்பம் (Astrologer Signature):</span><br>
+          <strong style="color:#1e1b4b; font-size:1rem;">${astrologerName}</strong>
         </div>
       </div>
     `;
