@@ -8,10 +8,10 @@
   <meta name="keywords" content="PG Astrologer, ஸ்ரீ பச்சையம்மன் துணை, ஸ்ரீ கங்கையம்மன் துணை, சுபத்துவம், சூட்சும வலு, பாபத்துவம், நாடி ஜோதிடம், இணைவு பலன்கள், பிறந்த நாள் ஜாதகம், நவகிரகங்கள், கோச்சாரம்">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/index.css?v=27">
-  <link rel="stylesheet" href="css/celestial.css?v=27">
-  <link rel="stylesheet" href="css/chart.css?v=27">
-  <link rel="stylesheet" href="css/print.css?v=27">
+  <link rel="stylesheet" href="css/index.css?v=31">
+  <link rel="stylesheet" href="css/celestial.css?v=31">
+  <link rel="stylesheet" href="css/chart.css?v=31">
+  <link rel="stylesheet" href="css/print.css?v=31">
 
 
   <!-- Favicon -->
@@ -45,6 +45,10 @@
           <span>🪐</span>
           <span id="liveAstroClock">07:15:00</span>
         </div>
+        <button class="btn btn-sm btn-outline-gold" id="btnUserAccessHeader" title="பயனர் அணுகல் / லாக் இன்">
+          <span>🔒</span>
+          <span>பிரீமியம் / உள்நுழைக</span>
+        </button>
         <button class="btn btn-sm btn-outline-gold" id="btnOpenThemeModal" title="தோற்றம் / தீம் தேர்வுகள்">
           <span>🎨</span>
           <span>தோற்றம்</span>
@@ -185,6 +189,9 @@
         <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
           <button class="btn btn-gold" id="btnCalculateHoroscope" style="flex: 1; min-width: 200px;">
             <span>🌟</span> ஜாதகம் கணிக்க (Calculate Horoscope)
+          </button>
+          <button class="btn btn-outline-gold" id="btnSetCurrentDateTime">
+            <span>⏱️</span> தற்போதைய நேரம் (Current Now)
           </button>
           <button class="btn btn-secondary" id="btnResetBirthForm">
             <span>🔄</span> மீட்டமை (Reset)
@@ -667,23 +674,97 @@
     </div>
   </div>
 
+  <!-- User Access & Role Selection Modal -->
+  <div class="modal-backdrop" id="accessModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 style="color:var(--gold-primary); font-size:1.1rem; display:flex; align-items:center; gap:0.4rem; font-family: var(--font-heading);">
+          <span>🔑</span> பயனர் அணுகல் &amp; லாக் இன் (Access Control)
+        </h3>
+        <button class="modal-close-btn" id="btnCloseAccessModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="accessModalSubtitle" style="font-size:0.85rem; color:var(--gold-light); margin-bottom:1rem; padding:0.6rem 0.8rem; background:rgba(212,175,55,0.08); border-radius:var(--radius-sm); border:1px solid rgba(212,175,55,0.25);">
+          PG Astrologer கட்டணச் சேவைகள் மற்றும் நிர்வாகி அணுகல் மையம்.
+        </div>
+
+        <!-- Role Status Indicator -->
+        <div style="margin-bottom: 1.15rem; background: rgba(255,255,255,0.03); padding: 0.75rem 0.9rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1);">
+          <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 4px;">தற்போதைய அணுகல் நிலை (Current Tier):</div>
+          <div id="currentAccessRoleBadge" style="font-size: 0.95rem; font-weight: bold; color: var(--gold-primary);">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- 1. Passcode Activation Form -->
+        <div style="margin-bottom: 1.25rem;">
+          <label style="font-size:0.85rem; font-weight:700; color:var(--gold-light); display:block; margin-bottom:0.4rem;">
+            1. அணுகல் குறியீடு உள்ளிடுக (Passcode Login):
+          </label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="accessPasscodeInput" placeholder="எ.கா: ADMIN123 அல்லது PAID2026" style="flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); padding:0.5rem 0.7rem; border-radius:var(--radius-sm); color:#fff; font-size:0.9rem;">
+            <button class="btn btn-gold" id="btnSubmitAccessCode" onclick="window.PGAstroAuth &amp;&amp; window.PGAstroAuth.loginWithCode(document.getElementById('accessPasscodeInput').value)">
+              <span>🔓</span> உள்நுழைக
+            </button>
+          </div>
+          <div id="accessModalStatus" style="font-size:0.82rem; margin-top:0.45rem; font-weight:600;"></div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.45rem; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px;">
+            💡 குறிப்பு: Admin Passcode: <code style="color:var(--gold-primary);">ADMIN123</code> | Paid Passcode: <code style="color:#38bdf8;">PAID2026</code>
+          </div>
+        </div>
+
+        <!-- 2. Direct Role Switcher (For Testing & Demo) -->
+        <div style="margin-bottom: 1rem;">
+          <label style="font-size:0.85rem; font-weight:700; color:var(--gold-light); display:block; margin-bottom:0.5rem;">
+            2. நேரடி அணுகல் நிலை தெரிவு (Quick Switch for Demo):
+          </label>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+            <button class="btn btn-sm btn-secondary" id="btnSetRoleFree" onclick="window.PGAstroAuth &amp;&amp; window.PGAstroAuth.quickSwitchRole('free')">
+              <span>👤</span> Free User
+            </button>
+            <button class="btn btn-sm btn-gold" id="btnSetRolePaid" onclick="window.PGAstroAuth &amp;&amp; window.PGAstroAuth.quickSwitchRole('paid')">
+              <span>⭐</span> Paid User
+            </button>
+            <button class="btn btn-sm btn-gold" id="btnSetRoleAdmin" onclick="window.PGAstroAuth &amp;&amp; window.PGAstroAuth.quickSwitchRole('admin')">
+              <span>👑</span> Admin (Full)
+            </button>
+          </div>
+        </div>
+
+        <!-- Restricted Features List Note -->
+        <div style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.75rem; margin-top: 1rem;">
+          <div style="font-weight: 600; color: var(--gold-light); margin-bottom: 4px;">🔒 கட்டண பயனர்கள் மற்றும் Admin-க்கு மட்டுமே கிடைக்கும் வசதிகள்:</div>
+          <ul style="padding-left: 1.2rem; margin: 0; line-height: 1.5;">
+            <li>சுபத்துவம் &amp; சூட்சும வலு கோட்பாடுகள்</li>
+            <li>பாவக விதிகள், காரக சாரிகை &amp; முக்காலப் பலன்கள்</li>
+            <li>ஜாதகக் கேள்வி - பதில்</li>
+            <li>காரகங்கள் &amp; மருத்துவம்</li>
+            <li>கிரக இணைவு பலன்கள்</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Application Scripts -->
-  <script src="js/data/combinations.js?v=28"></script>
-  <script src="js/data/transits.js?v=28"></script>
-  <script src="js/data/dasha.js?v=28"></script>
-  <script src="js/data/karakas.js?v=28"></script>
-  <script src="js/data/subhathuvam.js?v=28"></script>
-  <script src="js/data/rules.js?v=28"></script>
-  <script src="js/astronomy.js?v=28"></script>
-  <script src="js/chart.js?v=28"></script>
-  <script src="js/ruleEngine.js?v=28"></script>
-  <script src="js/nadiPredictionEngine.js?v=28"></script>
-  <script src="js/bhavaRulesEngine.js?v=28"></script>
-  <script src="js/engine.js?v=28"></script>
-  <script src="js/ui.js?v=28"></script>
-  <script src="js/app.js?v=28"></script>
+  <script src="js/data/combinations.js?v=30"></script>
+  <script src="js/data/transits.js?v=30"></script>
+  <script src="js/data/dasha.js?v=30"></script>
+  <script src="js/data/karakas.js?v=30"></script>
+  <script src="js/data/subhathuvam.js?v=30"></script>
+  <script src="js/data/rules.js?v=30"></script>
+  <script src="js/astronomy.js?v=30"></script>
+  <script src="js/chart.js?v=30"></script>
+  <script src="js/ruleEngine.js?v=30"></script>
+  <script src="js/nadiPredictionEngine.js?v=30"></script>
+  <script src="js/bhavaRulesEngine.js?v=30"></script>
+  <script src="js/engine.js?v=30"></script>
+  <script src="js/auth.js?v=30"></script>
+  <script src="js/ui.js?v=30"></script>
+  <script src="js/app.js?v=30"></script>
 </body>
 </html>

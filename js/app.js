@@ -4,6 +4,11 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("🌟 PG Astro - Raja Nadi Astrology Portal Initializing...");
 
+  // 0. Initialize Auth & Access Control
+  if (window.PGAstroAuth) {
+    window.PGAstroAuth.init();
+  }
+
   // 1. Initialize Rasi Chart
   if (window.PGAstro && window.PGAstro.chart) {
     window.PGAstro.chart.init();

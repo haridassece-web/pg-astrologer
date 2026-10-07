@@ -20,6 +20,9 @@ window.PGAstroUI = window.PGAstroUI || {};
     if (window.PGAstroBhavaEngine) {
       window.PGAstroBhavaEngine.render();
     }
+    if (window.PGAstroAuth) {
+      window.PGAstroAuth.updateUI();
+    }
   }
 
   // 1. Tab Navigation (Top desktop + Mobile bottom bar)
@@ -41,9 +44,17 @@ window.PGAstroUI = window.PGAstroUI || {};
       scrollToCalc = true;
     }
 
+    if (window.PGAstroAuth && !window.PGAstroAuth.hasAccess(tabId)) {
+      window.PGAstroAuth.showAccessModal(tabId);
+    }
+
     // Update active tab buttons
     document.querySelectorAll(".nav-tab-btn, .mobile-nav-item").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.tab === tabId || (scrollToCalc && btn.dataset.tab === "birth-calc"));
+      const isActive = btn.dataset.tab === tabId || (scrollToCalc && btn.dataset.tab === "birth-calc");
+      btn.classList.toggle("active", isActive);
+      if (isActive && btn.classList.contains("nav-tab-btn")) {
+        btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
     });
 
     // Update tab panes
@@ -148,6 +159,22 @@ window.PGAstroUI = window.PGAstroUI || {};
     });
   }
 
+  // Helper functions for current date & time
+  function getCurrentDateStr() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function getCurrentTimeStr() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
   // 1.5. Birth Calculation Form Setup
   function setupBirthCalculationForm() {
     const calcBtn = document.getElementById("btnCalculateHoroscope");
@@ -158,6 +185,15 @@ window.PGAstroUI = window.PGAstroUI || {};
     const timeInput = document.getElementById("birthCalcTime");
     const placeSelect = document.getElementById("birthCalcPlaceSelect");
     const placeCustom = document.getElementById("birthCalcPlaceCustom");
+    const nowBtn = document.getElementById("btnSetCurrentDateTime");
+
+    // Populate current live Date & Time into form inputs
+    if (dateInput && (!dateInput.value || dateInput.value === "1988-04-30")) {
+      dateInput.value = getCurrentDateStr();
+    }
+    if (timeInput && (!timeInput.value || timeInput.value === "22:10")) {
+      timeInput.value = getCurrentTimeStr();
+    }
 
     // Populate cities in dropdown if select exists
     if (placeSelect && window.PGAstro && window.PGAstro.astronomy) {
@@ -174,8 +210,8 @@ window.PGAstroUI = window.PGAstroUI || {};
     function doCalculate(isAuto = false) {
       const name = nameInput?.value.trim() || "அன்பர் (Native)";
       const gender = genderInput?.value || "male";
-      const date = dateInput?.value;
-      const time = timeInput?.value || "12:00";
+      const date = dateInput?.value || getCurrentDateStr();
+      const time = timeInput?.value || getCurrentTimeStr();
       
       if (!date) {
         if (!isAuto) showToast("தயவுசெய்து பிறந்த தேதியை தேர்ந்தெடுக்கவும் (Please select Date of Birth)");
@@ -253,17 +289,24 @@ window.PGAstroUI = window.PGAstroUI || {};
     placeCustom?.addEventListener("input", () => doCalculate(true));
     placeCustom?.addEventListener("change", () => doCalculate(true));
 
+    nowBtn?.addEventListener("click", () => {
+      if (dateInput) dateInput.value = getCurrentDateStr();
+      if (timeInput) timeInput.value = getCurrentTimeStr();
+      doCalculate(false);
+      showToast("⏱️ தற்போதைய தேதி மற்றும் நேரம் புதுப்பிக்கப்பட்டது!");
+    });
+
     // Auto calculate initial horoscope on page load
     doCalculate(true);
 
     resetBtn?.addEventListener("click", () => {
       if (nameInput) nameInput.value = "";
       if (genderInput) genderInput.value = "male";
-      if (dateInput) dateInput.value = "";
-      if (timeInput) timeInput.value = "";
+      if (dateInput) dateInput.value = getCurrentDateStr();
+      if (timeInput) timeInput.value = getCurrentTimeStr();
       if (placeCustom) placeCustom.value = "";
-      window.PGAstro.chart.clear();
-      showToast("ஜாதகக் கட்டம் மீட்டமைக்கப்பட்டது");
+      doCalculate(false);
+      showToast("🔄 ஜாதகம் தற்போதைய தேதி & நேரத்திற்கு மீட்டமைக்கப்பட்டது");
     });
   }
 
