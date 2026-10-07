@@ -48,42 +48,35 @@
   }
 
   /* 3. Report Modal Container display in print */
-  #reportModal.modal-backdrop {
-    position: static !important;
-    display: block !important;
-    background: #ffffff !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-  }
-
-  #reportModal .modal-dialog {
+  #reportModal,
+  #reportModal.modal-backdrop,
+  #reportModal .modal-dialog,
+  #reportModal .modal-body,
+  .print-report-container {
     position: static !important;
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
     border: none !important;
     box-shadow: none !important;
     transform: none !important;
+    backdrop-filter: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   #reportModal .modal-header,
   #reportModal .modal-close-btn {
     display: none !important;
-  }
-
-  #reportModal .modal-body {
-    padding: 0 !important;
-    margin: 0 !important;
-    background: #ffffff !important;
-    overflow: visible !important;
   }
 
   /* 4. Printable Report Body */
