@@ -786,8 +786,8 @@ window.PGAstroUI = window.PGAstroUI || {};
         if (!centerRendered) {
           cellsHtml += `
             <div style="grid-column: 2 / span 2; grid-row: 2 / span 2; border: 1.5px solid #d4af37; background: #0b0f19; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4px; border-radius: 4px;" class="print-hub">
-              <div style="font-weight: 800; font-size: 0.95rem; color: #ffd700; font-family: serif;">${chartTitle}</div>
-              <div style="font-size: 0.72rem; color: #94a3b8;">${isNavamsa ? 'D-9 நவாம்சம்' : 'D-1 ராசி சக்கரம்'}</div>
+              <div style="font-weight: 800; font-size: 0.95rem; color: #ffd700; font-family: serif;" class="print-hub-title">${chartTitle}</div>
+              <div style="font-size: 0.72rem; color: #94a3b8;" class="print-hub-sub">${isNavamsa ? 'D-9 நவாம்சம்' : 'D-1 ராசி சக்கரம்'}</div>
             </div>
           `;
           centerRendered = true;
@@ -811,18 +811,18 @@ window.PGAstroUI = window.PGAstroUI || {};
 
       cellsHtml += `
         <div style="border: 1px solid rgba(212,175,55,0.4); padding: 3px 4px; min-height: 52px; font-size: 0.68rem; background: #111726; border-radius: 3px; display: flex; flex-direction: column;" class="print-cell">
-          <div style="font-weight: 700; color: #f5c518; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 1px; margin-bottom: 2px; display: flex; justify-content: space-between; font-size: 0.65rem;">
+          <div style="font-weight: 700; color: #f5c518; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 1px; margin-bottom: 2px; display: flex; justify-content: space-between; font-size: 0.65rem;" class="print-cell-header">
             <span>${cell.name}</span>
             <span style="color: #64748b; font-size: 0.6rem;">${cell.lord}</span>
           </div>
-          <div style="color: #e2e8f0; font-size: 0.66rem; line-height: 1.3; flex: 1;">${items.join("<br>") || "-"}</div>
+          <div style="color: #e2e8f0; font-size: 0.66rem; line-height: 1.3; flex: 1;" class="print-cell-content">${items.join("<br>") || "-"}</div>
         </div>
       `;
     });
 
     return `
       <div style="border: 2px solid #d4af37; border-radius: 6px; padding: 4px; background: #070a12; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" class="print-chart-box">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 3px;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 3px; aspect-ratio: 1 / 1;">
           ${cellsHtml}
         </div>
       </div>
