@@ -145,35 +145,16 @@
             <input type="time" id="birthCalcTime" value="22:10" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); padding: 0.45rem 0.7rem; border-radius: var(--radius-md); color: #fff; width: 100%;">
           </div>
           <div>
-            <label style="font-size: 0.78rem; color: var(--gold-light); display: block; margin-bottom: 3px; font-weight: 600;">பிறந்த இடம் (Place of Birth):</label>
+            <label style="font-size: 0.78rem; color: var(--gold-light); display: block; margin-bottom: 3px; font-weight: 600;">பிறந்த இடம் (Place of Birth / District / Country):</label>
             <select id="birthCalcPlaceSelect" style="background: #0d1224; border: 1px solid rgba(255,255,255,0.15); padding: 0.5rem 0.7rem; border-radius: var(--radius-md); color: #fff; width: 100%; margin-bottom: 4px;">
-              <option value="">-- முக்கிய நகரங்கள் (Select City) --</option>
-              <option value="chennai">சென்னை (Chennai)</option>
+              <option value="">-- பிறந்த இடம் / மாவட்டம் / நாடு தேர்வு செய்க (Select Place / Country) --</option>
               <option value="tiruvannamalai" selected>திருவண்ணாமலை (Tiruvannamalai)</option>
+              <option value="chennai">சென்னை (Chennai)</option>
               <option value="madurai">மதுரை (Madurai)</option>
               <option value="coimbatore">கோயம்புத்தூர் (Coimbatore)</option>
               <option value="trichy">திருச்சி (Tiruchirappalli)</option>
-              <option value="salem">சேலம் (Salem)</option>
-              <option value="tirunelveli">திருநெல்வேலி (Tirunelveli)</option>
-              <option value="erode">ஈரோடு (Erode)</option>
-              <option value="vellore">வேலூர் (Vellore)</option>
-              <option value="thanjavur">தஞ்சாவூர் (Thanjavur)</option>
-              <option value="dindigul">திண்டுக்கல் (Dindigul)</option>
-              <option value="tiruppur">திருப்பூர் (Tiruppur)</option>
-              <option value="kanchipuram">காஞ்சிபுரம் (Kanchipuram)</option>
-              <option value="cuddalore">கடலூர் (Cuddalore)</option>
-              <option value="pondicherry">புதுச்சேரி (Pondicherry)</option>
-              <option value="nagercoil">நாகர்கோவில் (Nagercoil)</option>
-              <option value="karur">கரூர் (Karur)</option>
-              <option value="bengaluru">பெங்களூரு (Bengaluru)</option>
-              <option value="hyderabad">ஹைதராபாத் (Hyderabad)</option>
-              <option value="mumbai">மும்பை (Mumbai)</option>
-              <option value="delhi">டெல்லி (New Delhi)</option>
-              <option value="singapore">சிங்கப்பூர் (Singapore)</option>
-              <option value="kualalumpur">மலேசியா (Kuala Lumpur)</option>
-              <option value="colombo">இலங்கை (Colombo)</option>
             </select>
-            <input type="text" id="birthCalcPlaceCustom" placeholder="அல்லது வேறு ஊர் தட்டச்சு செய்க" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 0.35rem 0.6rem; border-radius: var(--radius-sm); color: #fff; width: 100%; font-size: 0.78rem;">
+            <input type="text" id="birthCalcPlaceCustom" list="citiesDatalist" placeholder="அல்லது மாவட்டம், நகரம் அல்லது நாடு தட்டச்சு செய்க 🔍" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 0.35rem 0.6rem; border-radius: var(--radius-sm); color: #fff; width: 100%; font-size: 0.78rem;">
           </div>
           <div>
             <label style="font-size: 0.78rem; color: var(--gold-light); display: block; margin-bottom: 3px; font-weight: 600;">திருமண நிலை (Marital Status):</label>
@@ -653,7 +634,7 @@
           </div>
           <div>
             <label style="font-size:0.78rem; color:var(--text-muted); display:block; margin-bottom:2px;">பிறந்த இடம் (Place):</label>
-            <input type="text" id="clientNativePlace" value="திருவண்ணாமலை" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); padding:0.4rem 0.6rem; border-radius:6px; color:#fff; width:100%;">
+            <input type="text" id="clientNativePlace" list="citiesDatalist" value="திருவண்ணாமலை" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); padding:0.4rem 0.6rem; border-radius:6px; color:#fff; width:100%;">
           </div>
           <div>
             <label style="font-size:0.78rem; color:var(--gold-light); font-weight:700; display:block; margin-bottom:2px;">கணித்த ஜோதிடர் (Astrologer):</label>

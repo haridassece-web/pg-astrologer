@@ -195,14 +195,66 @@ window.PGAstroUI = window.PGAstroUI || {};
       timeInput.value = getCurrentTimeStr();
     }
 
-    // Populate cities in dropdown if select exists
+    // Populate cities in dropdown if select exists with organized optgroups & datalist
     if (placeSelect && window.PGAstro && window.PGAstro.astronomy) {
-      placeSelect.innerHTML = `<option value="">-- முக்கிய நகரங்கள் (Select City) --</option>`;
       const cities = window.PGAstro.astronomy.CITIES;
+      
+      const groupDefs = {
+        tn: "🏛️ தமிழ்நாடு (38 மாவட்டங்கள் & முக்கிய நகரங்கள்)",
+        south: "🏛️ புதுச்சேரி & தென்னிந்திய நகரங்கள் (South India)",
+        india: "🇮🇳 இந்திய மாநிலங்கள் & பெருநகரங்கள் (India States & Cities)",
+        global_cities: "✈️ வெளிநாட்டு வாழ் தமிழர்கள் / முக்கிய நகரங்கள் (Global Hubs)",
+        world_countries: "🌏 உலக நாடுகள் அனைத்தும் (All World Countries)"
+      };
+
+      const groupsMap = {};
+      for (let gKey in groupDefs) {
+        groupsMap[gKey] = [];
+      }
+
       for (let key in cities) {
         const c = cities[key];
-        placeSelect.innerHTML += `<option value="${key}">${c.name}</option>`;
+        const gKey = c.group || "tn";
+        if (groupsMap[gKey]) {
+          groupsMap[gKey].push({ key, ...c });
+        } else {
+          groupsMap["tn"].push({ key, ...c });
+        }
       }
+
+      let selectHTML = `<option value="">-- பிறந்த இடம் தேர்வு செய்யவும் (Select Place of Birth) --</option>`;
+      let datalistHTML = "";
+
+      for (let gKey in groupDefs) {
+        const list = groupsMap[gKey];
+        if (list && list.length > 0) {
+          selectHTML += `<optgroup label="${groupDefs[gKey]}">`;
+          for (let item of list) {
+            selectHTML += `<option value="${item.key}">${item.name}</option>`;
+            datalistHTML += `<option value="${item.name}"></option>`;
+          }
+          selectHTML += `</optgroup>`;
+        }
+      }
+
+      placeSelect.innerHTML = selectHTML;
+
+      let datalistEl = document.getElementById("citiesDatalist");
+      if (!datalistEl) {
+        datalistEl = document.createElement("datalist");
+        datalistEl.id = "citiesDatalist";
+        document.body.appendChild(datalistEl);
+      }
+      datalistEl.innerHTML = datalistHTML;
+
+      if (placeCustom) {
+        placeCustom.setAttribute("list", "citiesDatalist");
+      }
+      const clientPlaceEl = document.getElementById("clientNativePlace");
+      if (clientPlaceEl) {
+        clientPlaceEl.setAttribute("list", "citiesDatalist");
+      }
+
       // Default to Tiruvannamalai
       placeSelect.value = "tiruvannamalai";
     }
@@ -228,14 +280,18 @@ window.PGAstroUI = window.PGAstroUI || {};
 
       if (customPlace) {
         placeName = customPlace;
-        const lower = customPlace.toLowerCase().replace(/[^a-z]/g, "");
+        const rawLower = customPlace.toLowerCase();
+        const cleanLower = rawLower.replace(/[^a-z0-9]/g, "");
         const cities = window.PGAstro.astronomy.CITIES;
+        let matched = false;
         for (let key in cities) {
+          const c = cities[key];
           const kLower = key.toLowerCase();
-          const nameLower = cities[key].name.toLowerCase();
-          if (lower.includes(kLower) || kLower.includes(lower) || nameLower.includes(customPlace.toLowerCase())) {
-            lat = cities[key].lat;
-            lon = cities[key].lon;
+          const nameLower = c.name.toLowerCase();
+          if (nameLower.includes(rawLower) || (cleanLower.length >= 3 && (kLower.includes(cleanLower) || cleanLower.includes(kLower)))) {
+            lat = c.lat;
+            lon = c.lon;
+            matched = true;
             break;
           }
         }
