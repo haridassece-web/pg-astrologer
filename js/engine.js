@@ -2509,21 +2509,47 @@ window.PGAstroRulesEngine = {
       }
     }
 
+    const hasPaidAccess = window.PGAstroAuth ? window.PGAstroAuth.isPaid() : false;
+
     // =========================================================================
-    // 1. LIFE PREDICTIONS & KEY MILESTONES (முக்கிய வாழ்க்கை பலன்கள்)
+    // 1. LIFE PREDICTIONS & KEY MILESTONES (முக்கிய வாழ்க்கை பலன்கள் & கால நிர்ணயம்)
     // =========================================================================
     if (analysis.lifeMilestones) {
-      const m = analysis.lifeMilestones;
-      const ed = m.education;
-      const jv = m.jobVerdict;
-      const jt = m.jobTiming;
-      const mr = m.marriage;
-      const ch = m.child;
-      const hs = m.house;
-      const vh = m.vehicle;
+      if (!hasPaidAccess) {
+        html += `
+          <div class="milestones-dashboard-card highlight" style="margin-bottom: 1.25rem; padding: 1.8rem 1.2rem; text-align: center; border: 2px dashed rgba(212,175,55,0.45); border-radius: var(--radius-lg); background: rgba(11,15,29,0.92);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔒</div>
+            <h3 style="color: var(--gold-primary); font-size: 1.25rem; margin-bottom: 0.5rem; font-family: var(--font-heading);">
+              🌟 முக்கிய வாழ்க்கை பலன்கள் & கால நிர்ணயம் (Life Predictions) - Paid User & Admin Only
+            </h3>
+            <p style="color: var(--text-muted); max-width: 580px; margin: 0 auto 1.2rem; font-size: 0.88rem; line-height: 1.6;">
+              சுபத்துவம், சூட்சும வலு & நாடி விதிகளின்படி கணிக்கப்பட்ட கல்வி, வேலை, திருமணம், குழந்தைப் பிறப்பு, வீடு, கார் யோகங்களை அறிய <strong>Paid User</strong> அல்லது <strong>Admin</strong> ஆக உள்நுழையவும்.
+            </p>
+            <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
+              <button class="btn btn-sm btn-gold" onclick="window.PGAstroAuth && window.PGAstroAuth.showAccessModal('bhava-timeline')">
+                <span>🔑</span> அணுகல் குறியீடு / லாக் இன்
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="window.PGAstroAuth && window.PGAstroAuth.quickSwitchRole('paid')">
+                <span>⭐</span> Paid User ஆக மாற்று
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="window.PGAstroAuth && window.PGAstroAuth.quickSwitchRole('admin')">
+                <span>👑</span> Admin Access
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        const m = analysis.lifeMilestones;
+        const ed = m.education;
+        const jv = m.jobVerdict;
+        const jt = m.jobTiming;
+        const mr = m.marriage;
+        const ch = m.child;
+        const hs = m.house;
+        const vh = m.vehicle;
 
-      html += `
-        <div class="milestones-dashboard-card">
+        html += `
+          <div class="milestones-dashboard-card">
           <!-- Header -->
           <div class="milestones-header">
             <div>
@@ -3424,53 +3450,102 @@ window.PGAstroRulesEngine = {
           ` : ""}
 
           <!-- 9 Planets Detailed Subhathuvam & Papathuvam Cards Grid -->
-          <div style="font-size:0.82rem; font-weight:700; color:var(--gold-light); margin:0.85rem 0 0.5rem 0;">
-            📊 நவகிரக சுபத்துவம், சூட்சும வலு & பாபத்துவ புள்ளிகள்:
-          </div>
+          ${!hasPaidAccess ? `
+            <div class="cosmic-card highlight" style="margin-top: 1rem; margin-bottom: 1.25rem; padding: 1.6rem 1.2rem; text-align: center; border: 2px dashed rgba(212,175,55,0.45); border-radius: var(--radius-lg); background: rgba(11,15,29,0.92);">
+              <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">🔒</div>
+              <h4 style="color: var(--gold-primary); font-size: 1.15rem; margin-bottom: 0.4rem; font-family: var(--font-heading);">
+                📊 நவகிரக சுபத்துவம், சூட்சும வலு & பாபத்துவ புள்ளிகள் - Paid User & Admin Only
+              </h4>
+              <p style="color: var(--text-muted); max-width: 580px; margin: 0 auto 1.2rem; font-size: 0.86rem; line-height: 1.5;">
+                ஒவ்வொரு கிரகத்தின் துல்லிய சுபத்துவ, சூட்சும வலு மற்றும் பாபத்துவ புள்ளிகளின் முழு அட்டவணையை அறிய <strong>Paid User</strong> அல்லது <strong>Admin</strong> ஆக உள்நுழையவும்.
+              </p>
+              <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-sm btn-gold" onclick="window.PGAstroAuth && window.PGAstroAuth.showAccessModal('subhathuvam')">
+                  <span>🔑</span> அணுகல் பெற / லாக் இன்
+                </button>
+                <button class="btn btn-sm btn-secondary" onclick="window.PGAstroAuth && window.PGAstroAuth.quickSwitchRole('paid')">
+                  <span>⭐</span> Unlock as Paid User
+                </button>
+                <button class="btn btn-sm btn-secondary" onclick="window.PGAstroAuth && window.PGAstroAuth.quickSwitchRole('admin')">
+                  <span>👑</span> Admin Access
+                </button>
+              </div>
+            </div>
+          ` : `
+            <div style="font-size:0.82rem; font-weight:700; color:var(--gold-light); margin:0.85rem 0 0.5rem 0;">
+              📊 நவகிரக சுபத்துவம், சூட்சும வலு & பாபத்துவ புள்ளிகள்:
+            </div>
 
-          <div class="subha-planets-grid">
-            ${subha.planets.map(p => {
-              const rasi = RASIS.find(r => r.id === p.signId);
-              const rasiName = rasi ? rasi.name : "";
-              const degStr = window.PGAstro.chart.formatDegree(p.degree);
+            <div class="subha-planets-grid">
+              ${subha.planets.map(p => {
+                const rasi = RASIS.find(r => r.id === p.signId);
+                const rasiName = rasi ? rasi.name : "";
+                const degStr = window.PGAstro.chart.formatDegree(p.degree);
 
-              return `
-                <div class="subha-planet-card">
-                  <!-- Card Header -->
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
-                    <div>
-                      <strong style="color:#fff; font-size:0.95rem;">${p.planet}</strong>
-                      <span style="font-size:0.72rem; color:var(--text-muted); margin-left:4px;">(${rasiName} ${degStr})</span>
-                    </div>
-                    <span class="badge ${p.badgeClass}" style="font-size:0.7rem;">${p.status}</span>
-                  </div>
-
-                  <!-- Score Pill Group -->
-                  <div class="score-tag-group">
-                    <span class="score-badge badge-subha" title="சுபத்துவ புள்ளிகள்">சுபம்: +${p.subhaScore}</span>
-                    ${p.sookshumaScore > 0 ? `<span class="score-badge badge-sookshuma" title="சூட்சும வலு புள்ளிகள்">சூட்சுமம்: +${p.sookshumaScore}</span>` : ""}
-                    ${p.papaScore > 0 ? `<span class="score-badge badge-papa" title="பாபத்துவ புள்ளிகள்">பாபம்: -${p.papaScore}</span>` : ""}
-                    <span class="score-badge badge-net" title="நிகர சுபத்துவ மதிப்பு">நிகரம்: ${p.netScore >= 0 ? '+' + p.netScore : p.netScore}</span>
-                  </div>
-
-                  <!-- Reasons List -->
-                  <div style="margin-top:0.4rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.35rem;">
-                    ${p.reasons.map(r => `
-                      <div class="subha-reason-line ${r.type}">
-                        <span>${r.type === 'subha' ? '🟢' : (r.type === 'sookshuma' ? '🔵' : (r.type === 'papa' ? '🔴' : '⚪'))}</span>
-                        <span>${r.text}</span>
+                return `
+                  <div class="subha-planet-card">
+                    <!-- Card Header -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+                      <div>
+                        <strong style="color:#fff; font-size:0.95rem;">${p.planet}</strong>
+                        <span style="font-size:0.72rem; color:var(--text-muted); margin-left:4px;">(${rasiName} ${degStr})</span>
                       </div>
-                    `).join("")}
+                      <span class="badge ${p.badgeClass}" style="font-size:0.7rem;">${p.status}</span>
+                    </div>
+
+                    <!-- Score Pill Group -->
+                    <div class="score-tag-group">
+                      <span class="score-badge badge-subha" title="சுபத்துவ புள்ளிகள்">சுபம்: +${p.subhaScore}</span>
+                      ${p.sookshumaScore > 0 ? `<span class="score-badge badge-sookshuma" title="சூட்சும வலு புள்ளிகள்">சூட்சுமம்: +${p.sookshumaScore}</span>` : ""}
+                      ${p.papaScore > 0 ? `<span class="score-badge badge-papa" title="பாபத்துவ புள்ளிகள்">பாபம்: -${p.papaScore}</span>` : ""}
+                      <span class="score-badge badge-net" title="நிகர சுபத்துவ மதிப்பு">நிகரம்: ${p.netScore >= 0 ? '+' + p.netScore : p.netScore}</span>
+                    </div>
+
+                    <!-- Reasons List -->
+                    <div style="margin-top:0.4rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:0.35rem;">
+                      ${p.reasons.map(r => `
+                        <div class="subha-reason-line ${r.type}">
+                          <span>${r.type === 'subha' ? '🟢' : (r.type === 'sookshuma' ? '🔵' : (r.type === 'papa' ? '🔴' : '⚪'))}</span>
+                          <span>${r.text}</span>
+                        </div>
+                      `).join("")}
+                    </div>
                   </div>
-                </div>
-              `;
-            }).join("")}
-          </div>
+                `;
+              }).join("")}
+            </div>
+          `}
 
           <!-- ============================================================= -->
           <!-- 12 BHAVAS SUBHATHUVAM, PAPATHUVAM & SEPARATE PREDICTIONS -->
           <!-- ============================================================= -->
           ${(subha.bhavas && subha.bhavas.length > 0) ? (() => {
+            if (!hasPaidAccess) {
+              return `
+                <div class="bhava-subha-section" style="margin-top:1.5rem; padding-top:1.2rem; border-top:1px dashed rgba(212,175,55,0.3);">
+                  <div class="cosmic-card highlight" style="padding: 1.6rem 1.2rem; text-align: center; border: 2px dashed rgba(212,175,55,0.45); border-radius: var(--radius-lg); background: rgba(11,15,29,0.92);">
+                    <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">🔒</div>
+                    <h4 style="color: var(--gold-primary); font-size: 1.15rem; margin-bottom: 0.4rem; font-family: var(--font-heading);">
+                      🏛️ 12 பாவங்களின் சுபத்துவம், பாபத்துவம் & தனித்தனி பலன்கள் - Paid User & Admin Only
+                    </h4>
+                    <p style="color: var(--text-muted); max-width: 580px; margin: 0 auto 1.2rem; font-size: 0.86rem; line-height: 1.5;">
+                      12 பாவங்களின் சுபத்துவ, பாபத்துவ தரவரிசை, தனித்தனி பாவப் பலன்கள் மற்றும் தோஷ நிவர்த்தி பரிகாரங்களை பார்வையிட <strong>Paid User</strong> அல்லது <strong>Admin</strong> ஆக உள்நுழையவும்.
+                    </p>
+                    <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
+                      <button class="btn btn-sm btn-gold" onclick="window.PGAstroAuth && window.PGAstroAuth.showAccessModal('bhava-timeline')">
+                        <span>🔑</span> அணுகல் பெற / லாக் இன்
+                      </button>
+                      <button class="btn btn-sm btn-secondary" onclick="window.PGAstroAuth && window.PGAstroAuth.quickSwitchRole('paid')">
+                        <span>⭐</span> Unlock as Paid User
+                      </button>
+                      <button class="btn btn-sm btn-secondary" onclick="window.PGAstroAuth && window.PGAstroAuth.quickSwitchRole('admin')">
+                        <span>👑</span> Admin Access
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }
             const bhs = subha.bhavas;
             const goodCount = bhs.filter(b => b.isGood === true).length;
             const moderateCount = bhs.filter(b => b.isGood === null).length;
@@ -3620,72 +3695,100 @@ window.PGAstroRulesEngine = {
           })() : ""}
         </div>
       `;
+      }
     }
 
     // =========================================================================
     // 3. DETECTED NADI CONJUNCTIONS & TRINES (இணைவு பலன்கள்)
     // =========================================================================
-    html += `
-      <div style="margin-bottom: 1.25rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-          <h3 style="font-size:1.05rem; color:var(--gold-primary); display:flex; align-items:center; gap:0.4rem; margin:0;">
-            <span>⚡</span> கண்டறியப்பட்ட இணைவுகள் (${analysis.detectedConjunctions.length})
-          </h3>
-          <span style="font-size:0.75rem; color:var(--text-muted);">PG Astrologer நாடி முறை</span>
-        </div>
-    `;
-
-    if (analysis.detectedConjunctions.length === 0) {
+    if (!hasPaidAccess) {
       html += `
-        <div class="cosmic-card" style="padding: 1rem; text-align:center; color: var(--text-muted); font-size:0.88rem;">
-          நேரடி அல்லது திரிகோண இணைவுகள் எதுவும் அமையவில்லை. கிரகங்களை 1, 5, 9 அல்லது 7-ஆம் வீடுகளில் அமைத்து பார்க்கவும்.
+        <div style="margin-bottom: 1.25rem;">
+          <div class="cosmic-card highlight" style="padding: 1.6rem 1.2rem; text-align: center; border: 2px dashed rgba(212,175,55,0.45); border-radius: var(--radius-lg); background: rgba(11,15,29,0.92);">
+            <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">🔒</div>
+            <h3 style="color: var(--gold-primary); font-size: 1.15rem; margin-bottom: 0.4rem; font-family: var(--font-heading);">
+              ⚡ கண்டறியப்பட்ட இணைவுகள் (Planetary Conjunctions) - Paid User & Admin Only
+            </h3>
+            <p style="color: var(--text-muted); max-width: 580px; margin: 0 auto 1.2rem; font-size: 0.86rem; line-height: 1.5;">
+              ஜாதகத்தில் அமைந்த அனைத்து நவகிரக சேர்க்கைகள், பார்வைகள் மற்றும் நாடி இணைவுப் பலன்களை அறிய <strong>Paid User</strong> அல்லது <strong>Admin</strong> ஆக உள்நுழையவும்.
+            </p>
+            <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
+              <button class="btn btn-sm btn-gold" onclick="window.PGAstroAuth && window.PGAstroAuth.showAccessModal('combinations')">
+                <span>🔑</span> அணுகல் பெற / லாக் இன்
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="window.PGAstroAuth && window.PGAstroAuth.quickSwitchRole('paid')">
+                <span>⭐</span> Unlock as Paid User
+              </button>
+              <button class="btn btn-sm btn-secondary" onclick="window.PGAstroAuth && window.PGAstroAuth.quickSwitchRole('admin')">
+                <span>👑</span> Admin Access
+              </button>
+            </div>
+          </div>
         </div>
       `;
     } else {
-      html += `<div style="display: flex; flex-direction: column; gap: 0.85rem;">`;
-      analysis.detectedConjunctions.forEach((item) => {
-        const comb = item.data;
-        if (!comb) {
-          html += `
-            <div class="cosmic-card" style="padding: 0.9rem;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
-                <strong>${item.p1} + ${item.p2}</strong>
-                <span style="font-size:0.72rem; color:var(--gold-light);">${item.type} (${item.rasiName})</span>
+      html += `
+        <div style="margin-bottom: 1.25rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+            <h3 style="font-size:1.05rem; color:var(--gold-primary); display:flex; align-items:center; gap:0.4rem; margin:0;">
+              <span>⚡</span> கண்டறியப்பட்ட இணைவுகள் (${analysis.detectedConjunctions.length})
+            </h3>
+            <span style="font-size:0.75rem; color:var(--text-muted);">PG Astrologer நாடி முறை</span>
+          </div>
+      `;
+
+      if (analysis.detectedConjunctions.length === 0) {
+        html += `
+          <div class="cosmic-card" style="padding: 1rem; text-align:center; color: var(--text-muted); font-size:0.88rem;">
+            நேரடி அல்லது திரிகோண இணைவுகள் எதுவும் அமையவில்லை. கிரகங்களை 1, 5, 9 அல்லது 7-ஆம் வீடுகளில் அமைத்து பார்க்கவும்.
+          </div>
+        `;
+      } else {
+        html += `<div style="display: flex; flex-direction: column; gap: 0.85rem;">`;
+        analysis.detectedConjunctions.forEach((item) => {
+          const comb = item.data;
+          if (!comb) {
+            html += `
+              <div class="cosmic-card" style="padding: 0.9rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+                  <strong>${item.p1} + ${item.p2}</strong>
+                  <span style="font-size:0.72rem; color:var(--gold-light);">${item.type} (${item.rasiName})</span>
+                </div>
+                <p style="font-size:0.84rem; color:var(--text-muted);">இந்த இரு கிரகங்களின் அடிப்படை காரகங்கள் ஒன்றுபட்டு பலன்களை உருவாக்குகின்றன.</p>
               </div>
-              <p style="font-size:0.84rem; color:var(--text-muted);">இந்த இரு கிரகங்களின் அடிப்படை காரகங்கள் ஒன்றுபட்டு பலன்களை உருவாக்குகின்றன.</p>
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="cosmic-card highlight" style="padding: 1rem;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.3rem;">
-                <div>
-                  <h4 style="font-size: 1rem; color: var(--gold-light);">${comb.title}</h4>
-                  <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                    <span>${item.type} • ${item.rasiName}</span>
-                    ${item.degInfo ? `<span class="badge badge-gold" style="font-size:0.68rem; padding:1px 5px; font-family:var(--font-mono, monospace);">${item.degInfo}</span>` : ""}
+            `;
+          } else {
+            html += `
+              <div class="cosmic-card highlight" style="padding: 1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.3rem;">
+                  <div>
+                    <h4 style="font-size: 1rem; color: var(--gold-light);">${comb.title}</h4>
+                    <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                      <span>${item.type} • ${item.rasiName}</span>
+                      ${item.degInfo ? `<span class="badge badge-gold" style="font-size:0.68rem; padding:1px 5px; font-family:var(--font-mono, monospace);">${item.degInfo}</span>` : ""}
+                    </div>
                   </div>
+                  <span class="planet-tag tag-${comb.p1}">${comb.category || "முக்கிய பலன்"}</span>
                 </div>
-                <span class="planet-tag tag-${comb.p1}">${comb.category || "முக்கிய பலன்"}</span>
+
+                ${comb.keywords ? `
+                  <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:0.6rem;">
+                    ${comb.keywords.map(k => `<span style="font-size:0.72rem; background:rgba(212,175,55,0.12); color:var(--gold-light); padding:1px 6px; border-radius:4px; border:1px solid rgba(212,175,55,0.2);">${k}</span>`).join("")}
+                  </div>
+                ` : ""}
+
+                <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-main); white-space: pre-line;">
+                  ${comb.prediction}
+                </p>
               </div>
+            `;
+          }
+        });
+        html += `</div>`;
+      }
 
-              ${comb.keywords ? `
-                <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:0.6rem;">
-                  ${comb.keywords.map(k => `<span style="font-size:0.72rem; background:rgba(212,175,55,0.12); color:var(--gold-light); padding:1px 6px; border-radius:4px; border:1px solid rgba(212,175,55,0.2);">${k}</span>`).join("")}
-                </div>
-              ` : ""}
-
-              <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-main); white-space: pre-line;">
-                ${comb.prediction}
-              </p>
-            </div>
-          `;
-        }
-      });
       html += `</div>`;
     }
-
-    html += `</div>`;
 
     // =========================================================================
     // 4. SPECIAL CONDITIONS (வக்கிரம், விளிம்பு, உச்சம், நீசம்)

@@ -58,6 +58,9 @@ window.PGAstroAuth = (function() {
     if (activeTab === 'bhava-timeline' && window.PGAstroBhavaEngine) {
       window.PGAstroBhavaEngine.render();
     }
+    if (window.PGAstroEngine && window.PGAstroEngine.evaluateCurrentChart) {
+      window.PGAstroEngine.evaluateCurrentChart();
+    }
 
     if (autoCloseModal) {
       setTimeout(() => {
