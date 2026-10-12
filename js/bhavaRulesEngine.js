@@ -540,14 +540,22 @@ window.PGAstroBhavaEngine = (function() {
 
     if (dashaRes.allBhuktis && Array.isArray(dashaRes.allBhuktis)) {
       const all = dashaRes.allBhuktis;
-      if (!currentPeriod && dashaRes.activeBhukti) currentPeriod = dashaRes.activeBhukti;
+      const curMaha = dashaRes.currentMahaDasa?.lord;
+      const curBhukti = dashaRes.currentBhukti?.lord;
       
-      if (currentPeriod) {
-        const curIdx = all.findIndex(b => b.lord === currentPeriod.lord || (b.startDate === currentPeriod.startDate));
-        if (curIdx !== -1) {
-          pastPeriods = all.slice(0, curIdx);
-          upcomingPeriods = all.slice(curIdx + 1);
-        }
+      let curIdx = -1;
+      if (curMaha && curBhukti) {
+        curIdx = all.findIndex(b => b.mahaLord === curMaha && b.bhuktiLord === curBhukti && !b.isPriorToBirth);
+      }
+      if (curIdx === -1 && currentPeriod) {
+        curIdx = all.findIndex(b => (b.mahaLord && currentPeriod.mahaLord && b.mahaLord === currentPeriod.mahaLord && b.bhuktiLord === currentPeriod.bhuktiLord) ||
+                                    (b.startMs && currentPeriod.startMs && b.startMs === currentPeriod.startMs) ||
+                                    (b.startDate && currentPeriod.startDate && b.startDate === currentPeriod.startDate));
+      }
+      if (curIdx !== -1) {
+        currentPeriod = all[curIdx];
+        pastPeriods = all.slice(0, curIdx);
+        upcomingPeriods = all.slice(curIdx + 1);
       } else if (all.length > 0) {
         currentPeriod = all[0];
         upcomingPeriods = all.slice(1);

@@ -286,27 +286,32 @@ window.PGAstroRulesEngine = {
 
       // 6. Calculate Vimshottari Dasa - Bhukti - Antharam (தசா, புத்தி, அந்தரம்)
       let dashaResult = null;
-      if (window.PGAstro.lastCalculatedHoroscope && window.PGAstro.lastCalculatedHoroscope.dasha) {
-        dashaResult = window.PGAstro.lastCalculatedHoroscope.dasha;
-      } else if (window.PGAstro.astronomy && window.PGAstro.astronomy.calculateVimshottariDasha) {
-        // Look for Moon in chartState
-        let moonRasiId = null;
-        let moonDeg = 15.0;
-        for (let rId in chartState) {
-          const m = chartState[rId].find(p => p.planet === "சந்திரன்");
-          if (m) {
-            moonRasiId = parseInt(rId);
-            moonDeg = m.degree !== undefined ? parseFloat(m.degree) : 15.0;
-            break;
-          }
+      let moonRasiId = null;
+      let moonDeg = 15.0;
+      for (let rId in chartState) {
+        const m = chartState[rId].find(p => p.planet === "சந்திரன்");
+        if (m) {
+          moonRasiId = parseInt(rId);
+          moonDeg = m.degree !== undefined ? parseFloat(m.degree) : 15.0;
+          break;
         }
+      }
 
-        if (moonRasiId) {
-          const moonLon = ((moonRasiId - 1) * 30) + moonDeg;
-          const birthDate = (nativeInfo && nativeInfo.dob) || document.getElementById("birthCalcDate")?.value || "1988-04-30";
-          const birthTime = (nativeInfo && nativeInfo.time) || document.getElementById("birthCalcTime")?.value || "12:00";
-          dashaResult = window.PGAstro.astronomy.calculateVimshottariDasha(birthDate, birthTime, moonLon);
+      const birthDate = (nativeInfo && nativeInfo.dob) || document.getElementById("birthCalcDate")?.value || "1988-04-30";
+      const birthTime = (nativeInfo && nativeInfo.time) || document.getElementById("birthCalcTime")?.value || "12:00";
+
+      if (window.PGAstro.lastCalculatedHoroscope && window.PGAstro.lastCalculatedHoroscope.dasha) {
+        const lastCalc = window.PGAstro.lastCalculatedHoroscope;
+        const lastMoonLon = lastCalc.moonLongitude !== undefined ? lastCalc.moonLongitude : null;
+        const curChartMoonLon = moonRasiId !== null ? (((moonRasiId - 1) * 30) + moonDeg) : null;
+        if (lastMoonLon !== null && curChartMoonLon !== null && Math.abs(lastMoonLon - curChartMoonLon) < 0.1) {
+          dashaResult = lastCalc.dasha;
         }
+      }
+
+      if (!dashaResult && moonRasiId !== null && window.PGAstro.astronomy && window.PGAstro.astronomy.calculateVimshottariDasha) {
+        const moonLon = ((moonRasiId - 1) * 30) + moonDeg;
+        dashaResult = window.PGAstro.astronomy.calculateVimshottariDasha(birthDate, birthTime, moonLon);
       }
 
       // 7. Evaluate Life Milestones (வேலை, தொழில், திருமணம், வீடு, வாகனம்/கார்)
@@ -336,6 +341,11 @@ window.PGAstroRulesEngine = {
 
       // 8. Render complete evaluation results on 1st Page
       renderEvaluationResults(analysisObj);
+
+      // 8.1 Dynamically update Tab 4 (Dasa - Bhukti - Antharam Dashboard) for this individual jathagam
+      if (window.PGAstroUI && typeof window.PGAstroUI.renderActiveDasaBhuktiAntharam === "function") {
+        window.PGAstroUI.renderActiveDasaBhuktiAntharam(analysisObj.dashaResult);
+      }
 
       // 9. Render Horoscope Q&A Page (Tab 7)
       renderHoroscopeQA(analysisObj);
@@ -2268,82 +2278,57 @@ window.PGAstroRulesEngine = {
   }
 
   function getChronologicalDasaPuthiTimeline(analysis) {
-    const dobStr = analysis?.nativeInfo?.dob || document.getElementById("birthCalcDate")?.value || "1989-05-15";
+    const dobStr = analysis?.nativeInfo?.dob || document.getElementById("birthCalcDate")?.value || "1988-04-30";
     const timeStr = analysis?.nativeInfo?.time || document.getElementById("birthCalcTime")?.value || "12:00";
     const dobDate = parseDateOnly(dobStr);
 
-    let allBhuktis = (analysis.milestones && analysis.milestones.allBhuktis) || [];
-    const msPerYear = 365.2425 * 24 * 60 * 60 * 1000;
-    const DASHA_ORDER = [
-      { lord: "கேது", years: 7 }, { lord: "சுக்கிரன்", years: 20 },
-      { lord: "சூரியன்", years: 6 }, { lord: "சந்திரன்", years: 10 },
-      { lord: "செவ்வாய்", years: 7 }, { lord: "ராகு", years: 18 },
-      { lord: "குரு", years: 16 }, { lord: "சனி", years: 19 },
-      { lord: "புதன்", years: 17 }
-    ];
+    let allBhuktis = (analysis.lifeMilestones && analysis.lifeMilestones.allBhuktis) ||
+                     (analysis.milestones && analysis.milestones.allBhuktis) ||
+                     (analysis.dashaResult && analysis.dashaResult.allBhuktis) || [];
 
     if (!allBhuktis || allBhuktis.length === 0) {
-      allBhuktis = [];
-      if (analysis.dashaResult && analysis.dashaResult.dashaTimeline) {
-        analysis.dashaResult.dashaTimeline.forEach(dasa => {
-          const dIdx = DASHA_ORDER.findIndex(d => d.lord === dasa.lord);
-          if (dIdx !== -1) {
-            let bStart = dasa.startMs || (dasa.startDate ? new Date(dasa.startDate).getTime() : (dasa.start ? new Date(dasa.start).getTime() : null));
-            if (bStart) {
-              const mInfo = DASHA_ORDER[dIdx];
-              for (let b = 0; b < 9; b++) {
-                const bInfo = DASHA_ORDER[(dIdx + b) % 9];
-                const bDur = (mInfo.years * bInfo.years / 120) * msPerYear;
-                const bEnd = bStart + bDur;
-                allBhuktis.push({
-                  mahaLord: mInfo.lord,
-                  bhuktiLord: bInfo.lord,
-                  startDate: new Date(bStart),
-                  endDate: new Date(bEnd),
-                  startAge: (bStart - dobDate.getTime()) / msPerYear,
-                  endAge: (bEnd - dobDate.getTime()) / msPerYear
-                });
-                bStart = bEnd;
-              }
-            }
-          }
-        });
+      let moonLon = null;
+      if (analysis.placedPlanets) {
+        const m = analysis.placedPlanets.find(p => p.planet === "சந்திரன்");
+        if (m) moonLon = (m.rasiId - 1) * 30 + (m.degree !== undefined ? parseFloat(m.degree) : 15.0);
       }
-
-      if (allBhuktis.length === 0) {
-        let dIdx = 0;
-        let curStart = new Date(dobDate.getTime());
-        for (let cycle = 0; cycle < 7; cycle++) {
-          const mInfo = DASHA_ORDER[dIdx];
-          const mDur = mInfo.years * msPerYear;
-          let bStart = curStart.getTime();
-          for (let b = 0; b < 9; b++) {
-            const bInfo = DASHA_ORDER[(dIdx + b) % 9];
-            const bDur = (mInfo.years * bInfo.years / 120) * msPerYear;
-            const bEnd = bStart + bDur;
-            allBhuktis.push({
-              mahaLord: mInfo.lord,
-              bhuktiLord: bInfo.lord,
-              startDate: new Date(bStart),
-              endDate: new Date(bEnd),
-              startAge: (bStart - dobDate.getTime()) / msPerYear,
-              endAge: (bEnd - dobDate.getTime()) / msPerYear
-            });
-            bStart = bEnd;
-          }
-          curStart = new Date(curStart.getTime() + mDur);
-          dIdx = (dIdx + 1) % 9;
+      if (moonLon !== null && window.PGAstro?.astronomy?.calculateVimshottariDasha) {
+        const dRes = window.PGAstro.astronomy.calculateVimshottariDasha(dobStr, timeStr, moonLon);
+        if (dRes && dRes.allBhuktis) {
+          allBhuktis = dRes.allBhuktis;
         }
       }
     }
 
-    allBhuktis.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+    allBhuktis = allBhuktis.slice().sort((a, b) => {
+      const aTime = a.startDate ? (a.startDate instanceof Date ? a.startDate.getTime() : new Date(a.startDate).getTime()) : 0;
+      const bTime = b.startDate ? (b.startDate instanceof Date ? b.startDate.getTime() : new Date(b.startDate).getTime()) : 0;
+      return aTime - bTime;
+    });
 
     const nowMs = new Date().getTime();
-    let curIdx = allBhuktis.findIndex(b => b.startDate.getTime() <= nowMs && nowMs < b.endDate.getTime());
+    const curMahaLord = analysis.dashaResult?.currentMahaDasa?.lord;
+    const curBhuktiLord = analysis.dashaResult?.currentBhukti?.lord;
+    let curIdx = -1;
+
+    // Prioritize exact match with dashaResult current Maha Dasa and Bhukti
+    if (curMahaLord && curBhuktiLord) {
+      curIdx = allBhuktis.findIndex(b => b.mahaLord === curMahaLord && b.bhuktiLord === curBhuktiLord && (!b.isPriorToBirth));
+    }
 
     if (curIdx === -1) {
-      const firstFut = allBhuktis.findIndex(b => b.startDate.getTime() > nowMs);
+      curIdx = allBhuktis.findIndex(b => {
+        const sTime = b.startDate instanceof Date ? b.startDate.getTime() : new Date(b.startDate).getTime();
+        const eTime = b.endDate instanceof Date ? b.endDate.getTime() : new Date(b.endDate).getTime();
+        return sTime <= nowMs && nowMs < eTime;
+      });
+    }
+
+    if (curIdx === -1 && allBhuktis.length > 0) {
+      const firstFut = allBhuktis.findIndex(b => {
+        const sTime = b.startDate instanceof Date ? b.startDate.getTime() : new Date(b.startDate).getTime();
+        return sTime > nowMs;
+      });
       if (firstFut > 0) curIdx = firstFut - 1;
       else if (firstFut === 0) curIdx = 0;
       else curIdx = allBhuktis.length - 1;
@@ -3251,6 +3236,9 @@ window.PGAstroRulesEngine = {
       `;
     }
 
+    // Dasa - Bhukti Timeline Card (Past, Present, Future)
+    html += renderDasaPuthiTimelineCard(analysis);
+
     // =========================================================================
     // 2. VIMSHOTTARI DASA - BHUKTI - ANTHARAM (தசா, புத்தி, அந்தரம்)
     // =========================================================================
@@ -3934,8 +3922,8 @@ window.PGAstroRulesEngine = {
       return `${d.getDate()} ${monthsTamil[d.getMonth()]}, ${d.getFullYear()}`;
     };
 
-    const curBhuktiStart = formatPeriodDate(analysis.dashaResult?.currentBhukti?.start);
-    const curBhuktiEnd = formatPeriodDate(analysis.dashaResult?.currentBhukti?.end);
+    const curBhuktiStart = formatPeriodDate(analysis.dashaResult?.currentBhukti?.startDate || analysis.dashaResult?.currentBhukti?.start);
+    const curBhuktiEnd = formatPeriodDate(analysis.dashaResult?.currentBhukti?.endDate || analysis.dashaResult?.currentBhukti?.end);
     const curPeriodText = (curBhuktiStart && curBhuktiEnd) ? `${curBhuktiStart} முதல் ${curBhuktiEnd} வரை` : "நடப்பு காலம்";
 
     const ed = analysis.educationTiming || null;
@@ -3945,70 +3933,29 @@ window.PGAstroRulesEngine = {
     const hs = analysis.houseTiming || null;
     const vh = analysis.vehicleTiming || null;
 
-    let allBhuktis = (analysis.milestones && analysis.milestones.allBhuktis) || [];
+    let allBhuktis = (analysis.lifeMilestones && analysis.lifeMilestones.allBhuktis) ||
+                     (analysis.milestones && analysis.milestones.allBhuktis) ||
+                     (analysis.dashaResult && analysis.dashaResult.allBhuktis) || [];
+
     if (!allBhuktis || allBhuktis.length === 0) {
-      allBhuktis = [];
-      const msPerYear = 365.2425 * 24 * 60 * 60 * 1000;
-      const DASHA_ORDER = [
-        { lord: "கேது", years: 7 }, { lord: "சுக்கிரன்", years: 20 },
-        { lord: "சூரியன்", years: 6 }, { lord: "சந்திரன்", years: 10 },
-        { lord: "செவ்வாய்", years: 7 }, { lord: "ராகு", years: 18 },
-        { lord: "குரு", years: 16 }, { lord: "சனி", years: 19 },
-        { lord: "புதன்", years: 17 }
-      ];
-
-      if (analysis.dashaResult && analysis.dashaResult.dashaTimeline) {
-        analysis.dashaResult.dashaTimeline.forEach(dasa => {
-          const dIdx = DASHA_ORDER.findIndex(d => d.lord === dasa.lord);
-          if (dIdx !== -1) {
-            let bStart = dasa.startMs || (dasa.start ? new Date(dasa.start).getTime() : null);
-            if (bStart) {
-              const mInfo = DASHA_ORDER[dIdx];
-              for (let b = 0; b < 9; b++) {
-                const bInfo = DASHA_ORDER[(dIdx + b) % 9];
-                const bDur = (mInfo.years * bInfo.years / 120) * msPerYear;
-                const bEnd = bStart + bDur;
-                allBhuktis.push({
-                  mahaLord: mInfo.lord,
-                  bhuktiLord: bInfo.lord,
-                  startDate: new Date(bStart),
-                  endDate: new Date(bEnd),
-                  startAge: (bStart - dobDate.getTime()) / msPerYear,
-                  endAge: (bEnd - dobDate.getTime()) / msPerYear
-                });
-                bStart = bEnd;
-              }
-            }
-          }
-        });
+      let moonLon = null;
+      if (analysis.placedPlanets) {
+        const m = analysis.placedPlanets.find(p => p.planet === "சந்திரன்");
+        if (m) moonLon = (m.rasiId - 1) * 30 + (m.degree !== undefined ? parseFloat(m.degree) : 15.0);
       }
-
-      if (allBhuktis.length === 0) {
-        let dIdx = 0;
-        let curStart = new Date(dobDate.getTime());
-        for (let cycle = 0; cycle < 7; cycle++) {
-          const mInfo = DASHA_ORDER[dIdx];
-          const mDur = mInfo.years * msPerYear;
-          let bStart = curStart.getTime();
-          for (let b = 0; b < 9; b++) {
-            const bInfo = DASHA_ORDER[(dIdx + b) % 9];
-            const bDur = (mInfo.years * bInfo.years / 120) * msPerYear;
-            const bEnd = bStart + bDur;
-            allBhuktis.push({
-              mahaLord: mInfo.lord,
-              bhuktiLord: bInfo.lord,
-              startDate: new Date(bStart),
-              endDate: new Date(bEnd),
-              startAge: (bStart - dobDate.getTime()) / msPerYear,
-              endAge: (bEnd - dobDate.getTime()) / msPerYear
-            });
-            bStart = bEnd;
-          }
-          curStart = new Date(curStart.getTime() + mDur);
-          dIdx = (dIdx + 1) % 9;
+      if (moonLon !== null && window.PGAstro?.astronomy?.calculateVimshottariDasha) {
+        const dRes = window.PGAstro.astronomy.calculateVimshottariDasha(dobStr, "12:00", moonLon);
+        if (dRes && dRes.allBhuktis) {
+          allBhuktis = dRes.allBhuktis;
         }
       }
     }
+
+    allBhuktis = allBhuktis.slice().sort((a, b) => {
+      const aTime = a.startDate ? (a.startDate instanceof Date ? a.startDate.getTime() : new Date(a.startDate).getTime()) : 0;
+      const bTime = b.startDate ? (b.startDate instanceof Date ? b.startDate.getTime() : new Date(b.startDate).getTime()) : 0;
+      return aTime - bTime;
+    });
 
     function findBhuktiByAge(targetAge) {
       if (!allBhuktis.length) return null;
@@ -4178,36 +4125,130 @@ window.PGAstroRulesEngine = {
 
     const curDasaPl = (analysis.placedPlanets || []).find(p => p.planet === curDasaLord);
     const curDasaHouse = curDasaPl?.house || getPlanetAstroDetails(curDasaLord, analysis.placedPlanets, lagnaId).house;
-    const curDasaDignityText = curDasaPl?.isRetrograde ? "வக்கிரம் பெற்று" : (curDasaPl?.isExalted ? "உச்சம் பெற்று" : (curDasaPl?.isOwnHouse ? "ஆட்சி பெற்று" : "அமர்ந்து"));
+    const curDasaDignityText = curDasaPl?.isRetrograde ? "வக்கிரம் பெற்று" : (curDasaPl?.isExalted ? "உச்சம் பெற்று" : (curDasaPl?.isOwnHouse ? "ஆட்சி பெற்று" : (curDasaPl?.isDebilitated ? "நீசம் பெற்று" : "அமர்ந்து")));
     const curDasaPlacementText = curDasaHouse ? `${curDasaHouse}-ஆம் பாவகத்தில் ${curDasaDignityText}` : `சுப அமைப்பில் ${curDasaDignityText}`;
 
-    // Dynamic Gocharam (Transit Saturn & Rahu) houses relative to Moon sign
+    // 1. Dasa Phase & Dasa Sandhi Dynamic Evaluation
+    const dasaPct = analysis.dashaResult?.currentMahaDasa?.percentElapsed !== undefined
+      ? analysis.dashaResult.currentMahaDasa.percentElapsed
+      : 50;
+
+    let dasaPhaseText = "";
+    if (dasaPct <= 18) {
+      dasaPhaseText = `ஜாதகர் முந்தைய தசை நிறைவுபெற்று, ${curDasaYears} வருட <strong>${curDasaLord} மகா தசையின் ஆரம்ப சுழற்சியில் (தசா சந்தி - ஆரம்ப 18%)</strong> உள்ளார். புதிய தசை தொடங்கும் போது முந்தைய பணிச் சூழல் மாறுதல் அல்லது புதிய திசையை நோக்கி நகர்வதால் ஏற்படும் இயற்கையான உத்தியோக இடைவேளை (Career Transition Break).`;
+    } else if (dasaPct >= 82) {
+      dasaPhaseText = `ஜாதகர் ${curDasaYears} வருட <strong>${curDasaLord} மகா தசையின் முடிவுப் பகுதியில் (தசா அந்தியம் - தசா சந்தி)</strong> உள்ளார். அடுத்த தசைக்கான அடித்தளத்தை அமைக்கும் நோக்கில் முந்தைய நிறுவனத்தில் இருந்து விடுவிப்பு அல்லது புதிய துறையைத் தேர்ந்தெடுக்கும் நிலை உருவாகிறது.`;
+    } else {
+      dasaPhaseText = `ஜாதகர் ${curDasaYears} வருட <strong>${curDasaLord} மகா தசையின் நடுப்பகுதி சுழற்சியில் (${dasaPct}% நிறைவு)</strong> உள்ளார். மகா தசா நாதன் பொதுவாக பலன் தரும் நிலையில், தற்போதைய தொழில் தேக்கத்திற்கும் உத்தியோக சூழலுக்கும் <strong>நடப்பு ${curBhuktiLord} புக்தியின் காரகத்துவமும் அதன் பாவக அமைவுமே</strong> முக்கிய காரணமாகிறது.`;
+    }
+
+    // 2. Active Bhukti Lord Dynamics
+    const bhuktiRuledHouses = Object.keys(houseLords).filter(h => houseLords[h] === curBhuktiLord).map(Number);
+    const bhuktiRuledHousesText = bhuktiRuledHouses.length > 0 ? `${bhuktiRuledHouses.join("/")}-ஆம் அதிபதியான` : "சுப கிரகமான";
+    const bhuktiPl = (analysis.placedPlanets || []).find(p => p.planet === curBhuktiLord);
+    const rawBhuktiHouse = bhuktiPl?.house || getPlanetAstroDetails(curBhuktiLord, analysis.placedPlanets, lagnaId).house;
+    const bhuktiHouse = (rawBhuktiHouse && rawBhuktiHouse !== '-') ? rawBhuktiHouse : null;
+    const bhuktiDignity = bhuktiPl?.isExalted ? "உச்சம் பெற்று" : (bhuktiPl?.isOwnHouse ? "ஆட்சி பெற்று" : (bhuktiPl?.isDebilitated ? "நீசம் பெற்று பலவீனமாக" : (bhuktiPl?.isRetrograde ? "வக்கிரம் பெற்று" : "அமர்ந்து")));
+    const bhuktiSubhaScore = getSubha(curBhuktiLord).netScore || 0;
+
+    let bhuktiReasonText = "";
+    if (bhuktiRuledHouses.includes(8)) {
+      bhuktiReasonText = `நடப்பு புக்தி நாதன் <strong>${curBhuktiLord}</strong> 8-ஆம் பாவக (அவமானம்/தடை/திடீர் இழப்பு) அதிபதியாக செயல்படுவதால், பணியிடத்தில் எதிர்பாராத மன அழுத்தம், மேலதிகாரி கெடுபிடி அல்லது திடீர் உத்தியோக விலகல் ஏற்பட்டுள்ளது.`;
+    } else if (bhuktiRuledHouses.includes(12)) {
+      bhuktiReasonText = `நடப்பு புக்தி நாதன் <strong>${curBhuktiLord}</strong> 12-ஆம் பாவக (விரயம்/விடுவிப்பு) அதிபதியாக இயங்குவதால், பழைய உத்தியோகத்தை விட்டு விலகுதல், வெளியூர்/வெளிநாட்டு மாற்ற சிந்தனை அல்லது தற்காலிக வேலை இடைவெளி (Career Break) நேர்ந்துள்ளது.`;
+    } else if (bhuktiRuledHouses.includes(6)) {
+      bhuktiReasonText = `நடப்பு புக்தி நாதன் <strong>${curBhuktiLord}</strong> 6-ஆம் பாவக (ரோக/சத்ரு/கடன்/போராட்ட) அதிபதியாக ஆதிக்கம் செலுத்துவதால், நேர்முகத் தேர்வுகளில் கடும் போட்டி மற்றும் இழுபறி நிலவுகிறது.`;
+    } else if (bhuktiHouse && (bhuktiHouse === 6 || bhuktiHouse === 8 || bhuktiHouse === 12)) {
+      bhuktiReasonText = `நடப்பு புக்தி நாதன் <strong>${curBhuktiLord}</strong> ${bhuktiRuledHousesText} சுப கிரகமாக இருப்பினும், லக்னத்திற்கு <strong>${bhuktiHouse}-ஆம் மறைவு ஸ்தானத்தில் ${bhuktiDignity}</strong> நிற்பதால் உத்தியோக வாய்ப்புகள் கைக்கு எட்டும் தூரத்தில் தாமதமாகிறது.`;
+    } else {
+      const bhuktiPlaceDesc = bhuktiHouse ? `${bhuktiHouse}-ஆம் பாவத்தில் ${bhuktiDignity}` : `சுப பலம் பெற்று`;
+      bhuktiReasonText = `நடப்பு புக்தி நாதன் <strong>${curBhuktiLord}</strong> ${bhuktiRuledHousesText} <strong>${bhuktiPlaceDesc}</strong> (${bhuktiSubhaScore >= 0 ? '+' : ''}${bhuktiSubhaScore.toFixed(1)} சுப புள்ளிகள்) விளங்குவதால், உத்தியோகத்தில் மேலான அடுத்த நிலைக்கு (Career Elevation) நகர்த்துவதற்காக தற்காலிக மறுசீரமைப்பைத் தந்துள்ளது.`;
+    }
+
+    // 3. Mutual Relationship between Dasa Lord & Bhukti Lord
+    let mutualRelHtml = "";
+    if (curDasaPl && bhuktiPl && curDasaPl.rasiId && bhuktiPl.rasiId) {
+      const relDist = ((bhuktiPl.rasiId - curDasaPl.rasiId + 12) % 12) + 1;
+      if (relDist === 6 || relDist === 8) {
+        mutualRelHtml = `• <strong>தசா - புக்தி சஷ்டாஷ்டக தொடர்பு (6/8 Shadashtaka):</strong> தசா நாதன் ${curDasaLord} மற்றும் புக்தி நாதன் ${curBhuktiLord} இருவரும் பரஸ்பரம் 6/8 சஷ்டாஷ்டக மறைவு தொடர்பில் நிற்பதால், பணியிடத்தில் கருத்து வேறுபாடுகள் மற்றும் விருப்பமில்லாத பணி இடைவேளை உருவானது.<br>`;
+      } else if (relDist === 2 || relDist === 12) {
+        mutualRelHtml = `• <strong>தசா - புக்தி துவித்வாதச விரய தொடர்பு (2/12 Dwirdwadasa):</strong> தசா நாதனுக்கு 12-ல் புக்தி நாதன் மறைந்து நிற்பதால், பொருளாதாரச் சுழற்சியில் தேக்கமும் உத்தியோக மாற்றமும் நேர்ந்துள்ளது.<br>`;
+      }
+    }
+
+    // 4. Status of 6th & 10th Houses
+    const lord6Pl = (analysis.placedPlanets || []).find(p => p.planet === lord6);
+    const rawLord6House = lord6Pl?.house || getPlanetAstroDetails(lord6, analysis.placedPlanets, lagnaId).house;
+    const lord6House = (rawLord6House && rawLord6House !== '-') ? rawLord6House : null;
+    const lord6Dignity = lord6Pl?.isExalted ? "உச்சம் பெற்று" : (lord6Pl?.isOwnHouse ? "ஆட்சி பெற்று" : "அமர்ந்து");
+    const lord6PlacementText = lord6House ? `${lord6House}-ல் ${lord6Dignity}` : "சுப பலம் பெற்று";
+    const score6 = getSubha(lord6).netScore || 0;
+
+    let house6AnalysisText = "";
+    if (lord6House === 8 || lord6House === 12) {
+      house6AnalysisText = `உத்தியோக ஸ்தானாதிபதி ${lord6} ${lord6House}-ஆம் மறைவு ஸ்தானத்தில் இருப்பதால் நேர்முகத் தேர்வுகளில் இறுதிச் சுற்றில் வாய்ப்பு நழுவுதல் அல்லது தகுதிக்குக் குறைவான ஊதிய வாய்ப்புகள் வருதல்.`;
+    } else if (score6 < 0) {
+      house6AnalysisText = `6-ஆம் அதிபதி ${lord6} பாபத்துவ தாக்கத்தால் (-${Math.abs(score6).toFixed(1)} புள்ளிகள்) உத்தியோகத் தேடலில் கடுமையான போட்டிச் சூழலை எதிர்கொள்ள வைக்கிறார்.`;
+    } else {
+      house6AnalysisText = `6-ஆம் அதிபதி ${lord6} ${lord6PlacementText} (+${score6.toFixed(1)} சுப புள்ளிகள்) பலமாக இருப்பதால் போட்டித் தேர்வுகளிலும் நேர்முகத் தேர்வுகளிலும் வெற்றி பெறும் அஸ்திவாரம் ஜாதகருக்கு உண்டு.`;
+    }
+
+    const lord10Pl = (analysis.placedPlanets || []).find(p => p.planet === lord10);
+    const rawLord10House = lord10Pl?.house || getPlanetAstroDetails(lord10, analysis.placedPlanets, lagnaId).house;
+    const lord10House = (rawLord10House && rawLord10House !== '-') ? rawLord10House : null;
+    const planetsIn10 = (analysis.placedPlanets || []).filter(p => p.house === 10);
+    let house10AnalysisText = "";
+    if (planetsIn10.some(p => p.planet === "ராகு")) {
+      house10AnalysisText = `10-ஆம் பாவகத்தில் ராகு அமர்ந்துள்ளதால் தொழிலில் அடிக்கடி ஏற்றத்தாழ்வும், வழக்கமான நிறுவன வேலையில் நிலைக்க முடியாமல் மன அலைச்சலும் ஏற்படுகிறது.`;
+    } else if (planetsIn10.some(p => p.planet === "கேது")) {
+      house10AnalysisText = `10-ல் கேது நிற்பதால் செய்யும் வேலையில் திருப்தியின்மை, சலிப்பு அல்லது திடீர் பணி விலகல் உணர்வு ஏற்படுகிறது.`;
+    } else {
+      house10AnalysisText = `ஜீவன ஸ்தானாதிபதி ${lord10} ${lord10House ? `${lord10House}-ல்` : '10-ஆம் பாவகத்தோடு சுப தொடர்பில்'} விளங்குவதால் கௌரவமான தலைமைப் பதவி நிச்சயம் கிட்டும்.`;
+    }
+
+    // 5. Dynamic Gocharam
     const moonPl = (analysis.placedPlanets || []).find(p => p.planet === "சந்திரன்");
     const moonRasiId = moonPl ? moonPl.rasiId : (lagnaId || 1);
 
     const saturnHouseFromMoon = ((11 - moonRasiId + 12) % 12) + 1; // Current Transit Saturn in Aquarius (11)
-    let saturnGocharamText = `கோச்சார சனி ${saturnHouseFromMoon}-ஆம் இடத்தில் பயணிப்பதால்`;
-    if (saturnHouseFromMoon === 1) saturnGocharamText = "கோச்சார சனி ஜென்ம ராசியில் (ஜென்மச் சனி) பயணிப்பதால்";
-    else if (saturnHouseFromMoon === 2) saturnGocharamText = "கோச்சார சனி 2-ஆம் இடத்தில் (குடும்பச் சனி) பயணிப்பதால்";
-    else if (saturnHouseFromMoon === 4) saturnGocharamText = "கோச்சார சனி 4-ஆம் இடத்தில் (கண்டச் சனி) பயணிப்பதால்";
-    else if (saturnHouseFromMoon === 7) saturnGocharamText = "கோச்சார சனி 7-ஆம் இடத்தில் (கண்டச் சனி) பயணிப்பதால்";
-    else if (saturnHouseFromMoon === 8) saturnGocharamText = "கோச்சார சனி 8-ஆம் இடத்தில் (அஷ்டமச் சனி) பயணிப்பதால்";
-    else if (saturnHouseFromMoon === 12) saturnGocharamText = "கோச்சார சனி 12-ஆம் இடத்தில் (விரயச் சனி) பயணிப்பதால்";
+    let saturnDetailedText = "";
+    if (saturnHouseFromMoon === 1) saturnDetailedText = "ஜென்மச் சனி நடப்பதால் உத்தியோக முயற்சிகளில் அதிக அலைச்சல், உடல் சோர்வு மற்றும் கடுமையான உழைப்பிற்கு பிறகே அங்கீகாரம் கிடைக்கிறது.";
+    else if (saturnHouseFromMoon === 2) saturnDetailedText = "குடும்ப/பாதச் சனி நடப்பதால் குடும்பப் பொறுப்புகள் அதிகரிப்பு, நிதி நெருக்கடி, நேர்முகத் தேர்வுகளில் இழுபறி மற்றும் வாக்குவாதங்களால் வாய்ப்பு தள்ளிப்போகிறது.";
+    else if (saturnHouseFromMoon === 4) saturnDetailedText = "அர்த்தாஷ்டமச் சனி நடப்பதால் உத்தியோகத்தில் அமைதியின்மை, விரும்பிய பணி இடம் அமையாததால் விலகிய சூழல் நிலவுகிறது.";
+    else if (saturnHouseFromMoon === 7) saturnDetailedText = "கண்டச் சனி நடப்பதால் பணியிடத்தில் உயர் அதிகாரிகளுடன் கருத்து வேறுபாடு மற்றும் கூட்டாளி இணக்கமின்மை உள்ளது.";
+    else if (saturnHouseFromMoon === 8) saturnDetailedText = "அஷ்டமச் சனியின் ஆதிக்கத்தால் உத்தியோகத்தில் எதிர்பாராத பணி நீக்கம், நிறுவன மறுசீரமைப்பு (Layoff) அல்லது நீண்ட தொழில் இடைவேளை (Career Break) நேர்ந்துள்ளது.";
+    else if (saturnHouseFromMoon === 12) saturnDetailedText = "விரயச் சனி நடப்பதால் பழைய வேலையில் இருந்து விடுவிப்பு, இருப்பிட மாற்றம் மற்றும் மன அழுத்தம் ஏற்பட்டுள்ளது.";
+    else if (saturnHouseFromMoon === 11) saturnDetailedText = "கோச்சார சனி 11-ஆம் இடத்து லாபச் சனியாக (Upachaya) மிகச் சிறந்த அனுகூலத்தில் இருப்பதால், கோச்சாரம் தடையாக இல்லை! இந்த இடைவேளை மிகக் குறுகிய காலமே நீடிக்கும்; விரைவில் நல்ல நிறுவனத்தில் உயர் ஊதிய வாய்ப்பு கதவைத் தட்டும்.";
+    else if (saturnHouseFromMoon === 3) saturnDetailedText = "கோச்சார சனி 3-ஆம் உபசய ஸ்தானத்தில் சஞ்சரிப்பதால் புதிய முயற்சிகளில் தைரியம் பிறக்கும்; தடைகளைத் தகர்த்து மீண்டும் பணியில் அமரும் யோகம் உண்டு.";
+    else if (saturnHouseFromMoon === 6) saturnDetailedText = "கோச்சார சனி 6-ஆம் உபசய ஸ்தானத்தில் சஞ்சரிப்பதால் எதிர்ப்புகளையும் போட்டியாளர்களையும் வென்று புதிய வேலை பெறும் சூழல் அனுகூலமாக உள்ளது.";
+    else saturnDetailedText = `கோச்சார சனி சந்திரனுக்கு ${saturnHouseFromMoon}-ஆம் இடத்தில் சஞ்சரித்து சராசரி பலன்களைத் தருகிறார்.`;
+
+    const guruHouseFromMoon = ((2 - moonRasiId + 12) % 12) + 1; // Current Transit Jupiter in Taurus (2)
+    let guruDetailedText = "";
+    if (guruHouseFromMoon === 2 || guruHouseFromMoon === 5 || guruHouseFromMoon === 7 || guruHouseFromMoon === 9 || guruHouseFromMoon === 11) {
+      guruDetailedText = `• <strong>கோச்சார குருவின் சுப பார்வை பலம்:</strong> கோச்சார குரு ${guruHouseFromMoon}-ஆம் சுப ஸ்தானத்தில் அமர்ந்து தனது சுபப் பார்வையால் ராசியையும் உத்தியோக வழிகளையும் பலப்படுத்துவதால், விரைவில் விடிவுகாலம் பிறந்து புதிய வேலைக்கான நேர்முகத் தேர்வு அழைப்புகள் (Offer Letters) நிச்சயமாக வரும்!<br>`;
+    }
 
     const rahuHouseFromMoon = ((12 - moonRasiId + 12) % 12) + 1; // Current Transit Rahu in Pisces (12)
-    const rahuGocharamText = `கோச்சார ராகு ${rahuHouseFromMoon}-ஆம் இடத்தில் பயணிப்பதால்`;
+    const rahuGocharamText = `கோச்சார ராகு சந்திரனுக்கு ${rahuHouseFromMoon}-ஆம் இடத்தில் சஞ்சரிப்பதால் உத்தியோகம் குறித்த தேவையற்ற பயமும் மனக் குழப்பமும் நிலவுகிறது.`;
 
-    // Dynamic Placement for lord6
-    const lord6Pl = (analysis.placedPlanets || []).find(p => p.planet === lord6);
-    const lord6House = lord6Pl?.house || getPlanetAstroDetails(lord6, analysis.placedPlanets, lagnaId).house;
-    const lord6Dignity = lord6Pl?.isExalted ? "உச்சம் பெற்று" : (lord6Pl?.isOwnHouse ? "ஆட்சி பெற்று" : "அமர்ந்து");
-    const lord6PlacementText = lord6House ? `${lord6House}-ல் ${lord6Dignity}` : "சுப பலம் பெற்று";
-
-    // Dynamic Placement for lord9 & lord1
+    // 6. Dynamic Job vs Business Guidance
     const lord9Pl = (analysis.placedPlanets || []).find(p => p.planet === lord9);
     const lord9Dignity = lord9Pl?.isExalted ? `உச்ச ${lord9}` : (lord9Pl?.isOwnHouse ? `ஆட்சி ${lord9}` : lord9);
     const lord1Pl = (analysis.placedPlanets || []).find(p => p.planet === lord1);
     const lord1House = lord1Pl?.house ? `${lord1Pl.house}-ல்` : "";
+
+    const scoreService = (score6) + (lord6House === 6 || lord6House === 10 || lord6House === 11 ? 2.5 : 0) + (saturnSubha.netScore || 0);
+    const scoreBusiness = (getSubha(lord7).netScore || 0) + (getSubha(lord10).netScore || 0) + (mercurySubha.netScore || 0) + (getSubha(lord1).netScore >= 2 ? 1.5 : 0);
+    let jobVsBusinessHtml = "";
+
+    if (scoreBusiness >= scoreService + 2.0 && (getSubha(lord1).netScore || 0) >= 0) {
+      jobVsBusinessHtml = `• <strong>சொந்த தொழில் / வர்த்தகம் (Business / Entrepreneurship):</strong> 100% உச்சபட்ச முதன்மைப் பரிந்துரை! 7-ஆம் பாவக அதிபதி ${lord7} மற்றும் 10-ஆம் அதிபதி ${lord10} மேலான சுப பலம் பெற்றுள்ளதால், பிறரிடம் மாதச் சம்பளத்திற்குப் பணிபுரிவதை விட சுய வர்த்தகம், ஏஜென்சி, காண்ட்ராக்ட் அல்லது சொந்த நிறுவனம் தொடங்குவதே ஜாதகருக்கு ராஜ யோகத்தையும் பெரும் தனலாபத்தையும் நல்கும்.<br>• <strong>உத்தியோகம் (Job):</strong> ஆரம்ப கால மூலதனத்திற்கும் அனுபவத்திற்கும் தற்காலிகமாக செய்யலாம்; நீண்ட காலம் பிறரிடம் பணிபுரிந்தால் சுயமாக வளர முடியாது.<br>• 💡 <strong>ஆலோசனை / சேவை (Consultancy/Service):</strong> 10-ஆம் அதிபதி ${lord10} + லக்னாதிபதி ${lord1} இணைந்து செயல்படுவதால் <strong>${elevJob.yearRange}-க்குப் பிறகு (${elevJob.dasaBhukti})</strong> சுயாதீன ஆலோசனை / சேவைத் தொழில் பிரகாசிக்கும்.`;
+    } else if (scoreService >= scoreBusiness + 1.5) {
+      jobVsBusinessHtml = `• <strong>உத்தியோகம் / வேலை (Job):</strong> 100% முதன்மைப் பரிந்துரை! 6-ஆம் அதிபதி ${lord6} ${lord6PlacementText} உள்ளதால், நிறுவனங்களில் உயர் பொறுப்பான பதவிகளில் பணிபுரிந்து மாதச் சம்பளம் பெறுவதே நிலையான தனலாபத்தையும் பொருளாதார பாதுகாப்பையும் தரும்.<br>• <strong>சொந்த தொழில் (Business):</strong> தற்போது வேண்டாம் (Avoid Heavy Capital Business). 7-ஆம் பாவக பலத்தை விட 6-ஆம் பாவக சேவை பலம் மேலோங்கி இருப்பதால், இப்போது அதிக முதலீடு செய்து சொந்த தொழில் தொடங்கினால் மூலதன முடக்கம் வரலாம்.<br>• 💡 <strong>சேவை சார்ந்த தொழில் (Consultancy/Service):</strong> 10-ஆம் அதிபதி ${lord10} + 9-ஆம் அதிபதி ${lord9Dignity} + லக்னாதிபதி ${lord1} ${lord1House} இணைந்து சுப யோகம் தருவதால், <strong>${elevJob.yearRange}-க்குப் பிறகு (${elevJob.dasaBhukti})</strong> பகுதி நேர ஆலோசனை / சேவை சார்ந்த தொழில் செய்யலாம்.`;
+    } else {
+      jobVsBusinessHtml = `• <strong>இரு வழி யோகம் (Job + Independent Consultancy):</strong> 6 மற்றும் 7-ஆம் பாவகங்கள் சம சுப பலத்தில் உள்ளதால், நிலையான மாதச் சம்பள வேலையில் இருந்துகொண்டே, 9 மற்றும் 10-ஆம் அதிபதிகளின் சுப தொடர்பைப் பயன்படுத்தி பகுதி நேர ஆலோசனை / சேவை சார்ந்த சுயதொழில் (Consultancy/Agency) செய்வது உன்னதமான இரட்டை தனலாபத்தை தரும்.<br>• <strong>உத்தியோகம் (Job):</strong> பொருளாதாரப் பாதுகாப்பிற்கு முதன்மை அஸ்திவாரம்.<br>• <strong>சுய தொழில் (Business):</strong> கடன் வாங்காமல் குறைந்த முதலீட்டில் அறிவு சார்ந்த சேவைத் துறையில் ஈடுபடலாம்.`;
+    }
 
     // Evaluate Applicable Job Rules via Rule Engine (including Nadi Gocharam Rahu 2,6,10 Rule)
     const jobRuleContext = {
@@ -4234,18 +4275,27 @@ window.PGAstroRulesEngine = {
       }
     }
 
+    const q2CategoryLabel = curAgeYears < 26 ? "💼 முதல் வேலை" : "💼 உத்தியோக நிலை";
+    const q2QuestionTitle = curAgeYears < 26 
+      ? "புதியவர்களுக்கு (Freshers) முதல் வேலை எப்போது கிடைக்கும்? எந்த வயதில் பணி நியமனம் நடக்கும்?" 
+      : "தற்போதைய உத்தியோக நிலை & தொழில் இடைவேளைக்குக் காரணம் என்ன? புதிய வேலை எப்போது கிடைக்கும்?";
+    const q2HighlightBadge = curAgeYears < 26 ? (fJob.ageText || "வயது 20-22") : fJobChange.dasaBhukti;
+    const q2QuestionSummary = curAgeYears < 26 
+      ? "படிப்பு முடித்தவுடன் முதல் வேலை அமையும் வயது & தசாபுத்தி கால நிர்ணயம்" 
+      : "தற்போதைய வேலை நிலை, இடைவேளைக்கான ஜோதிடக் காரணங்கள் & அடுத்த வேலை வாய்ப்பு";
+
     questions.push({
       id: "qa_fresher_job",
       category: "job",
-      categoryLabel: "💼 முதல் வேலை",
+      categoryLabel: q2CategoryLabel,
       questionNumber: "கேள்வி 2",
-      questionTitle: "புதியவர்களுக்கு (Freshers) முதல் வேலை எப்போது கிடைக்கும்? எந்த வயதில் பணி நியமனம் நடக்கும்?",
-      questionSummary: "படிப்பு முடித்தவுடன் முதல் வேலை அமையும் வயது & தசாபுத்தி கால நிர்ணயம்",
-      highlightBadge: fJob.ageText || "வயது 20-22",
+      questionTitle: q2QuestionTitle,
+      questionSummary: q2QuestionSummary,
+      highlightBadge: q2HighlightBadge,
       dasaBhukti: fJob.dasaBhukti,
       yearRange: fJob.yearRange,
       ageRange: fJob.ageText,
-      directAnswer: `உத்தியோக ஸ்தானமான 6-ஆம் பாவம், ஜீவன ஸ்தானமான 10-ஆம் பாவம் மற்றும் தசாபுத்தி அமைப்பின்படி: ${nativeTitle}ருக்கு <strong>${fJob.dasaBhukti}</strong> காலகட்டத்தில் <strong>${fJob.yearRange} (${fJob.ageText})</strong> முதல் உத்தியோகம் அமைந்தது.<br><br>⏳ <strong>1. தற்போது வேலை இல்லாமல் இருக்கக் காரணம் என்ன? (Current Situation Analysis):</strong><br>• <strong>தசா சந்தி & தசை ஆரம்ப சுழற்சி:</strong> ஜாதகர் முந்தைய சுப தசை முடிவடைந்து, ${curDasaYears} வருட <strong>${curDasaLord} மகா தசைக்கு</strong> மாறியுள்ளார். ${curDasaLordHousesText} ${curDasaLord} ${curDasaPlacementText} அமைவதால், புதிய தசை ஆரம்பிக்கும் போது பழைய உத்தியோகத்தில் மாற்றத்தையும், தற்காலிக இடைவெளியையும் (Career Break) தந்துள்ளது.<br>• <strong>கோச்சார நிலை:</strong> தற்போது ${saturnGocharamText} மற்றும் ${rahuGocharamText} மன அழுத்தம் மற்றும் உத்தியோகத் தேடலில் தற்காலிகத் தாமதம் ஏற்பட்டுள்ளது.<br><br>🎯 <strong>2. புதிய வேலை எப்போது கிடைக்கும்? (New Job Timing & Nadi Rule):</strong><br>• <strong>நாடி ஜோதிட கோச்சார ராகு விதிப்படி:</strong> உத்தியோக ஸ்தான அதிபதி ${lord6} ${lord6PlacementText} பலமாக உள்ளதால், கோச்சார ராகு 6-ஆம் அதிபதி ${lord6} மற்றும் 10-ஆம் அதிபதி ${lord10}-ன் 1, 5, 9 திரிகோண வீடுகளில் சஞ்சரிக்கும் <strong>${fJobChange.dasaBhukti} (${fJobChange.yearRange})</strong> காலகட்டத்தில் புதிய வேலை வாய்ப்பு ஆணை (Appointment Order) நிச்சயமாகக் கைக்கு வரும்.<br>• 🏆 <strong>உச்சபட்ச பணி நியமன யோக காலம் (Peak Offer Window):</strong> <strong>${fJobChange.yearRange}</strong> காலகட்டத்தில் நல்ல சம்பளத்தில் புதிய உத்தியோகத்தில் அமரும் யோகம் உறுதியாகிறது.<br><br>💼 <strong>3. வேலையா? அல்லது சொந்த தொழிலா? (Job vs Business Guidance):</strong><br>• <strong>உத்தியோகம் / வேலை (Job):</strong> 100% முதன்மைப் பரிந்துரை! 6-ஆம் அதிபதி ${lord6} ${lord6PlacementText} உள்ளதால், நிறுவனங்களில் பணிபுரிந்து மாதச் சம்பளம் பெறுவதே நிலையான தனலாபத்தையும் பொருளாதார பாதுகாப்பையும் தரும்.<br>• <strong>சொந்த தொழில் (Business):</strong> தற்போது வேண்டாம் (Avoid Heavy Capital Business). 7-ஆம் பாவக அமைப்பால் இப்போது அதிக முதலீடு செய்து சொந்த வர்த்தகம் தொடங்கினால் சிரமங்கள் வரலாம்.<br>• 💡 <strong>சேவை சார்ந்த தொழில் (Consultancy/Service):</strong> 10-ஆம் அதிபதி ${lord10} + 9-ஆம் அதிபதி ${lord9Dignity} + லக்னாதிபதி ${lord1} ${lord1House} இணைந்து சுப யோகம் தருவதால், <strong>${elevJob.yearRange}-க்குப் பிறகு (${elevJob.dasaBhukti})</strong> பகுதி நேர ஆலோசனை / சேவை சார்ந்த தொழில் (Freelance/Consultancy) செய்யலாம்.` + matchedJobRulesText,
+      directAnswer: `உத்தியோக ஸ்தானமான 6-ஆம் பாவம், ஜீவன ஸ்தானமான 10-ஆம் பாவம் மற்றும் தசாபுத்தி அமைப்பின்படி: ${curAgeYears < 26 ? `${nativeTitle}ருக்கு <strong>${fJob.dasaBhukti}</strong> காலகட்டத்தில் <strong>${fJob.yearRange} (${fJob.ageText})</strong> முதல் உத்தியோகம் அமையும்.` : `${nativeTitle}ருக்கு <strong>${fJob.dasaBhukti}</strong> காலகட்டத்தில் <strong>${fJob.yearRange} (${fJob.ageText})</strong> முதல் உத்தியோகம் அமைந்தது.`}<br><br>⏳ <strong>1. தற்போது வேலை இல்லாமல் இருக்கக் காரணம் என்ன? (Current Situation Analysis):</strong><br>• <strong>தசா சுழற்சி நிலை:</strong> ${dasaPhaseText}<br>• <strong>நடப்பு புக்தி நாதன் (${curBhuktiLord}) ஆதிக்கம்:</strong> ${bhuktiReasonText}<br>${mutualRelHtml}• <strong>பாவக நிலவரம் (6 & 10-ஆம் பாவங்கள்):</strong> ${house6AnalysisText} ${house10AnalysisText}<br>• <strong>கோச்சார சனி நிலை:</strong> ${saturnDetailedText}<br>${guruDetailedText}• <strong>கோச்சார ராகு நிலை:</strong> ${rahuGocharamText}<br><br>🎯 <strong>2. புதிய வேலை எப்போது கிடைக்கும்? (New Job Timing & Nadi Rule):</strong><br>• <strong>நாடி ஜோதிட கோச்சார ராகு விதிப்படி:</strong> உத்தியோக ஸ்தான அதிபதி ${lord6} ${lord6PlacementText} பலமாக உள்ளதால், கோச்சார ராகு 6-ஆம் அதிபதி ${lord6} மற்றும் 10-ஆம் அதிபதி ${lord10}-ன் 1, 5, 9 திரிகோண வீடுகளில் சஞ்சரிக்கும் <strong>${fJobChange.dasaBhukti} (${fJobChange.yearRange})</strong> காலகட்டத்தில் புதிய வேலை வாய்ப்பு ஆணை (Appointment Order) நிச்சயமாகக் கைக்கு வரும்.<br>• 🏆 <strong>உச்சபட்ச பணி நியமன யோக காலம் (Peak Offer Window):</strong> <strong>${fJobChange.yearRange}</strong> காலகட்டத்தில் நல்ல சம்பளத்தில் புதிய உத்தியோகத்தில் அமரும் யோகம் உறுதியாகிறது.<br><br>💼 <strong>3. வேலையா? அல்லது சொந்த தொழிலா? (Job vs Business Guidance):</strong><br>${jobVsBusinessHtml}` + matchedJobRulesText,
       timings: {
         pastDasa: fJob.dasaBhukti,
         pastYears: fJob.yearRange,

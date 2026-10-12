@@ -36,6 +36,9 @@ window.PGAstroRuleEngine = (function () {
     const houseLords = context.houseLords || {}; // houseNo (1..12) -> planetName
     const subhaScores = context.subhathuvamScores || (context.subhathuvamResult?.scores) || {};
     const curDasa = context.currentDasa || (context.dashaResult?.currentBhukti) || {};
+    const curMahaLord = context.dashaResult?.currentMahaDasa?.lord || context.currentDasa?.mahaLord || context.currentDasa?.lord || "";
+    const curBhuktiLord = context.dashaResult?.currentBhukti?.lord || context.currentDasa?.bhuktiLord || context.currentDasa?.lord || "";
+    const curAntharamLord = context.dashaResult?.currentAntharam?.lord || context.currentDasa?.antharamLord || "";
     const gender = (context.nativeGender || context.nativeInfo?.gender || 'male').toLowerCase();
     const lagnaId = context.lagnaRasiId || 1;
 
@@ -140,8 +143,8 @@ window.PGAstroRuleEngine = (function () {
     // 8. Active Dasa-Bhukti Synergy Check (நடப்பு தசா-புக்தி)
     if (conditions.dasaBhuktiConnection && Array.isArray(conditions.dasaBhuktiConnection)) {
       conditions.dasaBhuktiConnection.forEach(req => {
-        const mahaLord = curDasa.mahaLord || curDasa.lord;
-        const bhuktiLord = curDasa.bhuktiLord || curDasa.lord;
+        const mahaLord = curMahaLord || curDasa.mahaLord || curDasa.lord;
+        const bhuktiLord = curBhuktiLord || curDasa.bhuktiLord || curDasa.lord;
         if (mahaLord === req.planet || bhuktiLord === req.planet) {
           matchScore += 20;
           matchReasons.push(`நடப்பு தசா/புக்தி அதிபதியாக ${req.planet} இயங்குகிறது`);
@@ -174,9 +177,9 @@ window.PGAstroRuleEngine = (function () {
       const lord3 = houseLords[3];
       const lord7 = houseLords[7];
       const lord11 = houseLords[11];
-      const mahaLord = curDasa.mahaLord || curDasa.lord;
-      const bhuktiLord = curDasa.bhuktiLord || curDasa.lord;
-      const antharamLord = curDasa.antharamLord || "சுக்கிரன்";
+      const mahaLord = curMahaLord || curDasa.mahaLord || curDasa.lord;
+      const bhuktiLord = curBhuktiLord || curDasa.bhuktiLord || curDasa.lord;
+      const antharamLord = curAntharamLord || curDasa.antharamLord || "சுக்கிரன்";
 
       const involvedLords = [mahaLord, bhuktiLord, antharamLord].filter(Boolean);
       const connects3 = involvedLords.some(p => p === lord3 || (planetMap[p] && planetMap[p].house === 3));
@@ -279,8 +282,8 @@ window.PGAstroRuleEngine = (function () {
       const lord2 = houseLords[2];
       const lord9 = houseLords[9];
       const lord11 = houseLords[11];
-      const mahaLord = curDasa.mahaLord || curDasa.lord;
-      const bhuktiLord = curDasa.bhuktiLord || curDasa.lord;
+      const mahaLord = curMahaLord || curDasa.mahaLord || curDasa.lord;
+      const bhuktiLord = curBhuktiLord || curDasa.bhuktiLord || curDasa.lord;
 
       if (mahaLord === lord2 || mahaLord === lord9 || mahaLord === lord11 || bhuktiLord === lord2 || bhuktiLord === lord9 || bhuktiLord === lord11 || mahaLord === "சனி" || bhuktiLord === "சுக்கிரன்") {
         matchScore += 40;

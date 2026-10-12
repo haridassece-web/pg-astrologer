@@ -1069,6 +1069,7 @@ window.PGAstro = window.PGAstro || {};
 
       bhuktis.push({
         lord: bLordInfo.lord,
+        bhuktiLord: bLordInfo.lord,
         mahaLord: activeDasa.lord,
         years: bDurationYears,
         startDate: new Date(bhuktiStartMs),
@@ -1078,9 +1079,72 @@ window.PGAstro = window.PGAstro || {};
       bhuktiStartMs = bEndMs;
     }
 
+    // Generate comprehensive allBhuktis for the native's full lifespan
+    const allBhuktis = [];
+    const firstIdx = DASHA_ORDER.findIndex(d => d.lord === nakInfo.birthDashaLord);
+    const safeFirstIdx = firstIdx !== -1 ? firstIdx : 0;
+    const birthMahaYears = DASHA_ORDER[safeFirstIdx].years;
+    const firstVirtualStartMs = firstEndDate.getTime() - (birthMahaYears * msPerYear);
+    let vBhuktiStartMs = firstVirtualStartMs;
+
+    for (let b = 0; b < 9; b++) {
+      const bLordInfo = DASHA_ORDER[(safeFirstIdx + b) % 9];
+      const bDurationYears = (birthMahaYears * bLordInfo.years) / 120;
+      const bDurationMs = bDurationYears * msPerYear;
+      const bEndMs = vBhuktiStartMs + bDurationMs;
+      if (bEndMs > birthDate.getTime()) {
+        const actualStartMs = Math.max(vBhuktiStartMs, birthDate.getTime());
+        allBhuktis.push({
+          mahaLord: nakInfo.birthDashaLord,
+          bhuktiLord: bLordInfo.lord,
+          lord: bLordInfo.lord,
+          years: bDurationYears,
+          startDate: new Date(actualStartMs),
+          endDate: new Date(bEndMs),
+          startMs: actualStartMs,
+          endMs: bEndMs,
+          startAge: Math.max(0, (actualStartMs - birthDate.getTime()) / msPerYear),
+          endAge: (bEndMs - birthDate.getTime()) / msPerYear,
+          isCurrent: (nowMs >= actualStartMs && nowMs < bEndMs),
+          color: bLordInfo.color
+        });
+      }
+      vBhuktiStartMs = bEndMs;
+    }
+
+    let nextDasaIdx = (safeFirstIdx + 1) % 9;
+    let nextDasaStartMs = firstEndDate.getTime();
+    for (let cycle = 0; cycle < 8; cycle++) {
+      const dInfo = DASHA_ORDER[nextDasaIdx];
+      let subBStartMs = nextDasaStartMs;
+      for (let b = 0; b < 9; b++) {
+        const bLordInfo = DASHA_ORDER[(nextDasaIdx + b) % 9];
+        const bDurationYears = (dInfo.years * bLordInfo.years) / 120;
+        const bDurationMs = bDurationYears * msPerYear;
+        const bEndMs = subBStartMs + bDurationMs;
+        allBhuktis.push({
+          mahaLord: dInfo.lord,
+          bhuktiLord: bLordInfo.lord,
+          lord: bLordInfo.lord,
+          years: bDurationYears,
+          startDate: new Date(subBStartMs),
+          endDate: new Date(bEndMs),
+          startMs: subBStartMs,
+          endMs: bEndMs,
+          startAge: (subBStartMs - birthDate.getTime()) / msPerYear,
+          endAge: (bEndMs - birthDate.getTime()) / msPerYear,
+          isCurrent: (nowMs >= subBStartMs && nowMs < bEndMs),
+          color: bLordInfo.color
+        });
+        subBStartMs = bEndMs;
+      }
+      nextDasaStartMs = subBStartMs;
+      nextDasaIdx = (nextDasaIdx + 1) % 9;
+    }
+
     let activeBhukti = bhuktis.find(b => nowMs >= b.startDate.getTime() && nowMs < b.endDate.getTime());
     if (!activeBhukti) {
-      activeBhukti = bhuktis[bhuktis.length - 1];
+      activeBhukti = allBhuktis.find(b => b.isCurrent) || bhuktis[bhuktis.length - 1];
     }
 
     // Divide active Bhukti into 9 Antharams
@@ -1097,6 +1161,7 @@ window.PGAstro = window.PGAstro || {};
 
       antharams.push({
         lord: aLordInfo.lord,
+        antharamLord: aLordInfo.lord,
         bhuktiLord: activeBhukti.lord,
         mahaLord: activeDasa.lord,
         startDate: new Date(antharamStartMs),
@@ -1125,6 +1190,7 @@ window.PGAstro = window.PGAstro || {};
 
       sookshmams.push({
         lord: sLordInfo.lord,
+        sookshmamLord: sLordInfo.lord,
         antharamLord: activeAntharam.lord,
         bhuktiLord: activeBhukti.lord,
         mahaLord: activeDasa.lord,
@@ -1228,38 +1294,61 @@ window.PGAstro = window.PGAstro || {};
       nakshatraInfo: nakInfo,
       currentMahaDasa: {
         lord: activeDasa.lord,
+        mahaLord: activeDasa.lord,
         startDate: formatDate(activeDasa.startDate),
         endDate: formatDate(activeDasa.endDate),
+        start: activeDasa.startDate,
+        end: activeDasa.endDate,
+        startMs: activeDasa.startDate.getTime(),
+        endMs: activeDasa.endDate.getTime(),
         color: activeDasa.color,
         percentElapsed: mahaProg.pct,
         remainingDays: mahaProg.remDays
       },
       currentBhukti: {
         lord: activeBhukti.lord,
+        bhuktiLord: activeBhukti.lord,
+        mahaLord: activeDasa.lord,
         startDate: formatDate(activeBhukti.startDate),
         endDate: formatDate(activeBhukti.endDate),
+        start: activeBhukti.startDate,
+        end: activeBhukti.endDate,
+        startMs: activeBhukti.startDate.getTime(),
+        endMs: activeBhukti.endDate.getTime(),
         color: activeBhukti.color,
         percentElapsed: bhuktiProg.pct,
         remainingDays: bhuktiProg.remDays
       },
       currentAntharam: {
         lord: activeAntharam.lord,
+        antharamLord: activeAntharam.lord,
+        bhuktiLord: activeBhukti.lord,
+        mahaLord: activeDasa.lord,
         startDate: formatDate(activeAntharam.startDate),
         endDate: formatDate(activeAntharam.endDate),
+        start: activeAntharam.startDate,
+        end: activeAntharam.endDate,
         color: activeAntharam.color,
         percentElapsed: antharamProg.pct,
         remainingDays: antharamProg.remDays
       },
       currentSookshmam: {
         lord: activeSookshmam.lord,
+        sookshmamLord: activeSookshmam.lord,
+        antharamLord: activeAntharam.lord,
+        bhuktiLord: activeBhukti.lord,
+        mahaLord: activeDasa.lord,
         startDate: formatDate(activeSookshmam.startDate),
         endDate: formatDate(activeSookshmam.endDate),
+        start: activeSookshmam.startDate,
+        end: activeSookshmam.endDate,
         color: activeSookshmam.color,
         percentElapsed: sookshmamProg.pct,
         remainingDays: sookshmamProg.remDays
       },
       currentAntharamsList: currentAntharamsList,
       currentSookshmamsList: currentSookshmamsList,
+      allBhuktis: allBhuktis,
       dashaTimeline: dashaTimeline.map(d => ({
         lord: d.lord,
         years: d.years,
@@ -1271,9 +1360,13 @@ window.PGAstro = window.PGAstro || {};
       })),
       upcomingBhuktis: bhuktis.map(b => ({
         lord: b.lord,
+        bhuktiLord: b.lord,
+        mahaLord: activeDasa.lord,
         years: b.years,
         startDate: formatDate(b.startDate),
         endDate: formatDate(b.endDate),
+        start: b.startDate,
+        end: b.endDate,
         startMs: b.startDate.getTime(),
         endMs: b.endDate.getTime(),
         isCurrent: (b.lord === activeBhukti.lord)

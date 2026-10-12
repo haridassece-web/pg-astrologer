@@ -639,8 +639,8 @@ window.PGAstro = window.PGAstro || {};
     const moonRasi = moonRasiId ? RASIS.find(r => r.id === moonRasiId)?.name : "";
 
     // 7. Dasha text & Current Dasha Info
-    let currentDasaInfo = window.PGAstro?.lastCalculatedHoroscope?.dasha;
-    if (moonLon !== null && window.PGAstro?.astronomy?.calculateVimshottariDasha) {
+    let currentDasaInfo = window.PGAstro?.lastCalculatedHoroscope?.dasha || window.PGAstro?.lastAnalysisObj?.dashaResult;
+    if ((!currentDasaInfo || !currentDasaInfo.currentMahaDasa) && moonLon !== null && window.PGAstro?.astronomy?.calculateVimshottariDasha) {
       const nDob = nInfo.dob || document.getElementById("birthCalcDate")?.value || "1988-04-30";
       const nTime = nInfo.time || document.getElementById("birthCalcTime")?.value || "12:00";
       currentDasaInfo = window.PGAstro.astronomy.calculateVimshottariDasha(nDob, nTime, moonLon);
@@ -648,7 +648,7 @@ window.PGAstro = window.PGAstro || {};
     const dashaText = currentDasaInfo?.nakshatraInfo?.balanceText || currentDasaInfo?.balanceText || (moonNak ? moonNak.balanceText : null) || "தசா இருப்பு கணிக்கப்பட்டது";
     const cDasaLord = currentDasaInfo?.currentMahaDasa?.lord || currentDasaInfo?.currentDasa?.lord || currentDasaInfo?.currentDasa || "குரு";
     const cBhuktiLord = currentDasaInfo?.currentBhukti?.lord || (currentDasaInfo?.upcomingBhuktis && currentDasaInfo.upcomingBhuktis.find(b => b.isCurrent)?.lord) || (currentDasaInfo?.upcomingBhuktis && currentDasaInfo.upcomingBhuktis[0]?.lord) || "சனி";
-    const cAntharamLord = currentDasaInfo?.currentAntharam?.lord || (currentDasaInfo?.currentSookshmamsList && currentDasaInfo.currentSookshmamsList.find(s => s.isCurrent)?.lord) || "புதன்";
+    const cAntharamLord = currentDasaInfo?.currentAntharam?.lord || (currentDasaInfo?.currentAntharamsList && currentDasaInfo.currentAntharamsList.find(a => a.isCurrent)?.lord) || (currentDasaInfo?.currentSookshmamsList && currentDasaInfo.currentSookshmamsList.find(s => s.isCurrent)?.lord) || "புதன்";
     const curDasaStr = currentDasaInfo ? `${cDasaLord} தசை • ${cBhuktiLord} புக்தி • ${cAntharamLord} அந்தரம்` : "";
 
     // Build HTML

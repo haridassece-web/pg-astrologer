@@ -66,6 +66,10 @@ window.PGAstroUI = window.PGAstroUI || {};
       window.PGAstroBhavaEngine.render();
     }
 
+    if (tabId === "dasha") {
+      renderActiveDasaBhuktiAntharam();
+    }
+
     if (scrollToCalc) {
       setTimeout(() => {
         const formEl = document.getElementById("birthCalcName") || document.getElementById("btnCalculateHoroscope");
@@ -1030,7 +1034,7 @@ window.PGAstroUI = window.PGAstroUI || {};
         const end = b.endDate || b.end || "-";
         bhuktiRowsHtml += `
           <tr>
-            <td style="font-weight:600;">${currentMahaDasa} தசை</td>
+            <td style="font-weight:600;">${b.mahaLord || currentMahaDasa} தசை</td>
             <td style="font-weight:600;">${lordName} புக்தி</td>
             <td>${start}</td>
             <td>${end}</td>
@@ -1299,11 +1303,15 @@ window.PGAstroUI = window.PGAstroUI || {};
     const container = document.getElementById("activeDasaBhuktiAntharamContainer");
     if (!container) return;
 
-    let dasha = customDasha || (window.PGAstro && window.PGAstro.lastCalculatedHoroscope && window.PGAstro.lastCalculatedHoroscope.dasha);
+    let dasha = customDasha ||
+                (window.PGAstro && window.PGAstro.lastAnalysisObj && window.PGAstro.lastAnalysisObj.dashaResult) ||
+                (window.PGAstro && window.PGAstro.lastCalculatedHoroscope && window.PGAstro.lastCalculatedHoroscope.dasha);
+
     if (!dasha && window.PGAstro && window.PGAstro.astronomy && window.PGAstro.astronomy.calculateVimshottariDasha) {
-      const dob = document.getElementById("birthCalcDate")?.value || "1988-04-30";
-      const time = document.getElementById("birthCalcTime")?.value || "12:00";
-      let moonLon = 30.0;
+      const nativeInfo = (window.PGAstro && window.PGAstro.chart && window.PGAstro.chart.getNativeInfo()) || {};
+      const dob = nativeInfo.dob || document.getElementById("birthCalcDate")?.value || "1988-04-30";
+      const time = nativeInfo.time || document.getElementById("birthCalcTime")?.value || "12:00";
+      let moonLon = null;
       const chartState = window.PGAstro?.chart?.getState();
       if (chartState) {
         for (let rId in chartState) {
@@ -1316,7 +1324,9 @@ window.PGAstroUI = window.PGAstroUI || {};
           }
         }
       }
-      dasha = window.PGAstro.astronomy.calculateVimshottariDasha(dob, time, moonLon);
+      if (moonLon !== null) {
+        dasha = window.PGAstro.astronomy.calculateVimshottariDasha(dob, time, moonLon);
+      }
     }
     if (!dasha || !dasha.currentMahaDasa) return;
 
