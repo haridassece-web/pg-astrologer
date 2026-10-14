@@ -1081,6 +1081,9 @@ window.PGAstro = window.PGAstro || {};
     if (window.PGAstroEngine) {
       window.PGAstroEngine.evaluateCurrentChart();
     }
+    if (window.PGAstroAshtakavarga) {
+      window.PGAstroAshtakavarga.onHoroscopeUpdated();
+    }
   }
 
   // Public API

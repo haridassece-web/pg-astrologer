@@ -2588,6 +2588,18 @@ window.PGAstroRulesEngine = {
                 <strong style="color: #ffd700;">👑 காரகம்:</strong> <span style="color:#fff;">AK: <strong style="color:#ffd700;">${akTag}</strong> | DK: <strong style="color:#f43f5e;">${dkTag}</strong></span>
               </div>
             ` : ''}
+          <!-- Ashtakavarga Quick Access Strip -->
+          <div style="background: radial-gradient(circle at top left, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.6rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.3rem;">🔢</span>
+              <div>
+                <strong style="color: var(--gold-primary); font-size: 0.88rem;">அஷ்டகவர்க்கம் &amp; சோத்திய பிண்டக் கணிதம்:</strong>
+                <div style="font-size: 0.74rem; color: var(--text-muted);">ஆதிப்பரல் • திரிகோண சோதனை • ஏகாதிபத்திய சோதனை • இராசி &amp; கிரக பிண்டம்</div>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-gold" onclick="window.PGAstroUI && window.PGAstroUI.switchTab('ashtakavarga')" style="font-size:0.75rem; padding:0.35rem 0.75rem;">
+              <span>📊</span> சோத்திய பிண்டத்தைக் காண்க
+            </button>
           </div>
 
           <!-- 7 Core Milestones Grid -->

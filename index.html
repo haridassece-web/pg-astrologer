@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/celestial.css?v=36">
   <link rel="stylesheet" href="css/chart.css?v=36">
   <link rel="stylesheet" href="css/print.css?v=36">
+  <link rel="stylesheet" href="css/ashtakavarga.css?v=36">
 
 
   <!-- Favicon -->
@@ -99,6 +100,10 @@
       <button class="nav-tab-btn" data-tab="bhava-timeline">
         <span class="nav-tab-icon">📜</span>
         <span>பாவக விதிகள் &amp; முக்காலப் பலன்கள்</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="ashtakavarga" id="navTabAshtakavarga">
+        <span class="nav-tab-icon">🔢</span>
+        <span>அஷ்டகவர்க்கம் &amp; சோத்திய பிண்டம்</span>
       </button>
     </div>
   </nav>
@@ -493,6 +498,13 @@
       <!-- Rendered dynamically by js/bhavaRulesEngine.js -->
     </section>
 
+    <!-- ==========================================
+         TAB 10: ASHTAKAVARGA & SHODHYA PINDAM
+         ========================================== -->
+    <section class="tab-pane" id="tab_ashtakavarga">
+      <!-- Rendered dynamically by js/ashtakavargaEngine.js -->
+    </section>
+
   </main>
 
   <!-- 5. Mobile Bottom Navigation Bar -->
@@ -528,6 +540,10 @@
     <button class="mobile-nav-item" data-tab="bhava-timeline">
       <span class="m-icon">📜</span>
       <span>பாவகம்</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="ashtakavarga">
+      <span class="m-icon">🔢</span>
+      <span>அஷ்டகவர்க்கம்</span>
     </button>
   </div>
 
@@ -718,6 +734,7 @@
             <li>ஜாதகக் கேள்வி - பதில்</li>
             <li>காரகங்கள் &amp; மருத்துவம்</li>
             <li>கிரக இணைவு பலன்கள்</li>
+            <li>அஷ்டகவர்க்கம் &amp; சோத்திய பிண்டக் கணிதங்கள் (Ashtakavarga &amp; Shodhya Pindam)</li>
           </ul>
         </div>
 
@@ -740,6 +757,7 @@
   <script src="js/ruleEngine.js?v=30"></script>
   <script src="js/nadiPredictionEngine.js?v=30"></script>
   <script src="js/bhavaRulesEngine.js?v=30"></script>
+  <script src="js/ashtakavargaEngine.js?v=30"></script>
   <script src="js/engine.js?v=30"></script>
   <script src="js/auth.js?v=30"></script>
   <script src="js/ui.js?v=30"></script>

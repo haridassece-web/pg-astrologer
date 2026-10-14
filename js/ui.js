@@ -23,6 +23,9 @@ window.PGAstroUI = window.PGAstroUI || {};
     if (window.PGAstroAuth) {
       window.PGAstroAuth.updateUI();
     }
+    if (window.PGAstroAshtakavarga) {
+      window.PGAstroAshtakavarga.render();
+    }
   }
 
   // 1. Tab Navigation (Top desktop + Mobile bottom bar)
@@ -68,6 +71,10 @@ window.PGAstroUI = window.PGAstroUI || {};
 
     if (tabId === "dasha") {
       renderActiveDasaBhuktiAntharam();
+    }
+
+    if (tabId === "ashtakavarga" && window.PGAstroAshtakavarga) {
+      window.PGAstroAshtakavarga.render();
     }
 
     if (scrollToCalc) {
@@ -335,6 +342,10 @@ window.PGAstroUI = window.PGAstroUI || {};
 
       if (!isAuto) {
         showToast(`🌟 ${name} (${gender === 'female' ? 'பெண்' : 'ஆண்'}) அவர்களின் ஜாதகம் துல்லியமாக கணிக்கப்பட்டது!`);
+      }
+
+      if (window.PGAstroAshtakavarga) {
+        window.PGAstroAshtakavarga.onHoroscopeUpdated();
       }
 
       // Switch to Chart Tab if not already on it

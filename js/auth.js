@@ -15,7 +15,8 @@ window.PGAstroAuth = (function() {
     'bhava-timeline': 'பாவக விதிகள், காரக சாரிகை & முக்காலப் பலன்கள்',
     'qa': 'ஜாதகக் கேள்வி - பதில்',
     'karakas': 'காரகங்கள் & மருத்துவம்',
-    'combinations': 'கிரக இணைவு பலன்கள்'
+    'combinations': 'கிரக இணைவு பலன்கள்',
+    'ashtakavarga': 'அஷ்டகவர்க்கம் & சோத்திய பிண்டம் (Ashtakavarga & Shodhya Pindam)'
   };
 
   const PASSCODES = {
@@ -57,6 +58,9 @@ window.PGAstroAuth = (function() {
 
     if (activeTab === 'bhava-timeline' && window.PGAstroBhavaEngine) {
       window.PGAstroBhavaEngine.render();
+    }
+    if (activeTab === 'ashtakavarga' && window.PGAstroAshtakavarga) {
+      window.PGAstroAshtakavarga.render();
     }
     if (window.PGAstroEngine && window.PGAstroEngine.evaluateCurrentChart) {
       window.PGAstroEngine.evaluateCurrentChart();

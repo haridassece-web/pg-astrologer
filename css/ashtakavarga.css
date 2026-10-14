@@ -1,0 +1,1047 @@
+/* ==========================================================================
+   PG ASTRO - ASHTAKAVARGA & SHODHYA PINDAM STYLESHEET (css/ashtakavarga.css)
+   Rich Celestial Gold & Dark Nebula Theme, Glassmorphic Cards & 3x South Indian Grids
+   ========================================================================== */
+
+/* Main Container */
+.ashta-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+/* Toolbar & Selector Bar */
+.ashta-toolbar-card {
+  background: radial-gradient(circle at top left, #17213d 0%, #0c1122 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.ashta-toolbar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.ashta-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ashta-title-icon {
+  font-size: 1.6rem;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.ashta-title-text {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--gold-primary, #ffd700);
+  margin: 0;
+  font-family: var(--font-heading, inherit);
+}
+
+.ashta-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 2px;
+}
+
+/* Planet Selector Pills */
+.ashta-planet-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0.85rem;
+}
+
+.ashta-planet-btn {
+  background: rgba(13, 18, 36, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.ashta-planet-btn:hover {
+  border-color: var(--gold-light, #ffd700);
+  background: rgba(212, 175, 55, 0.12);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.ashta-planet-btn.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(180, 130, 20, 0.35) 100%);
+  border-color: var(--gold-primary, #ffd700);
+  color: #ffd700;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+  font-weight: 700;
+}
+
+.ashta-planet-btn .badge-pill-pts {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 1px 6px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-family: monospace;
+}
+
+/* Quick Controls Row */
+.ashta-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.ashta-method-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 3px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ashta-method-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ashta-method-btn.active {
+  background: var(--gold-primary, #ffd700);
+  color: #0b0f1d;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+}
+
+.btn-sample-board {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-sample-board:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* 3-Chart Trio Grid */
+.ashta-charts-trio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (min-width: 1100px) {
+  .ashta-charts-trio {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Individual Chart Card */
+.ashta-chart-card {
+  background: radial-gradient(circle at center, #10162a 0%, #080c18 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: var(--radius-lg, 12px);
+  padding: 0.85rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.ashta-chart-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ashta-chart-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ashta-chart-badge {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* Mini South Indian Grid (4x4) */
+.ashta-south-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, minmax(62px, 1fr));
+  gap: 3px;
+  background: rgba(212, 175, 55, 0.3);
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  border-radius: 6px;
+  aspect-ratio: 1 / 1;
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
+  user-select: none;
+}
+
+/* Cells inside the 4x4 */
+.ashta-grid-cell {
+  background: #0d1222;
+  padding: 3px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  transition: background 0.15s ease;
+}
+
+.ashta-grid-cell:hover {
+  background: #171f38;
+}
+
+/* Center Hub in 4x4 Grid */
+.ashta-center-hub {
+  grid-area: 2 / 2 / 4 / 4;
+  background: radial-gradient(circle at center, #151e3a 0%, #090e1d 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.4rem;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+}
+
+.ashta-hub-title {
+  font-size: 0.78rem;
+  color: var(--gold-light, #ffd700);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ashta-hub-total {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  font-family: monospace;
+  line-height: 1.1;
+  margin: 3px 0;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.ashta-hub-desc {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+/* House header */
+.ashta-cell-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.62rem;
+  color: #94a3b8;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ashta-cell-rasi {
+  color: var(--gold-light, #ffd700);
+}
+
+/* Large Bindu Number */
+.ashta-cell-bindu {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  font-family: monospace;
+  line-height: 1;
+  margin: auto 0;
+}
+
+.ashta-cell-bindu.high-pts {
+  color: #34d399;
+  text-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+}
+
+.ashta-cell-bindu.low-pts {
+  color: #f87171;
+}
+
+/* Planet chips inside cell */
+.ashta-cell-planets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  min-height: 14px;
+}
+
+.ashta-pchip {
+  font-size: 0.58rem;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ashta-pchip.pchip-sevvai {
+  background: rgba(220, 38, 38, 0.35);
+  border: 1px solid rgba(220, 38, 38, 0.6);
+  color: #fca5a5;
+}
+
+.ashta-pchip.pchip-surya {
+  background: rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fed7aa;
+}
+
+.ashta-pchip.pchip-guru {
+  background: rgba(245, 197, 24, 0.3);
+  border: 1px solid rgba(245, 197, 24, 0.6);
+  color: #fef08a;
+}
+
+.ashta-pchip.pchip-sani {
+  background: rgba(129, 140, 248, 0.3);
+  border: 1px solid rgba(129, 140, 248, 0.6);
+  color: #c7d2fe;
+}
+
+/* Master Grand Shodhya Pinda Card */
+.ashta-grand-result-card {
+  background: radial-gradient(circle at center, #1b2545 0%, #0a0f20 100%);
+  border: 2px solid var(--gold-primary, #ffd700);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.25rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.2);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ashta-grand-result-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ffd700, #38bdf8, #ffd700);
+}
+
+.ashta-grand-equation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.ashta-eq-box {
+  background: rgba(13, 18, 36, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  padding: 0.85rem 1.4rem;
+  border-radius: 10px;
+  min-width: 140px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.ashta-eq-box.final-box {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(180, 130, 20, 0.35) 100%);
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.35);
+}
+
+.ashta-eq-label {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.ashta-eq-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #fff;
+  font-family: monospace;
+  line-height: 1;
+}
+
+.ashta-eq-box.final-box .ashta-eq-val {
+  color: #ffd700;
+  font-size: 2.2rem;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.ashta-eq-sign {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--gold-light, #ffd700);
+}
+
+/* Detailed Math Tables */
+.ashta-math-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.ashta-table-card {
+  background: #0f1528;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.ashta-table-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gold-light, #ffd700);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.ashta-styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.ashta-styled-table th {
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--gold-light, #ffd700);
+  padding: 6px 8px;
+  text-align: center;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.ashta-styled-table td {
+  padding: 5px 8px;
+  text-align: center;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ashta-styled-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ashta-styled-table tfoot td {
+  background: rgba(212, 175, 55, 0.18);
+  font-weight: 800;
+  color: #fff;
+  border-top: 2px solid var(--gold-primary, #ffd700);
+  font-size: 0.85rem;
+}
+
+/* 8x12 BAV Matrix Grid */
+.ashta-matrix-card {
+  background: #0f1528;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 10px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.ashta-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  min-width: 650px;
+}
+
+.ashta-matrix-table th,
+.ashta-matrix-table td {
+  padding: 6px 6px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.ashta-matrix-table th {
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--gold-light, #ffd700);
+  font-weight: 700;
+}
+
+.ashta-matrix-table td.point-one {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  font-weight: 700;
+}
+
+.ashta-matrix-table td.point-zero {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.ashta-matrix-table tfoot td {
+  background: rgba(212, 175, 55, 0.2);
+  font-weight: 800;
+  color: #ffd700;
+  font-family: monospace;
+  font-size: 0.82rem;
+}
+
+/* Predictive Cards Grid */
+.ashta-predict-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.ashta-predict-card {
+  background: rgba(13, 18, 36, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.9rem;
+  position: relative;
+}
+
+.ashta-predict-card.card-auspicious {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1) 0%, rgba(13, 18, 36, 0.9) 100%);
+}
+
+.ashta-predict-card.card-caution {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.1) 0%, rgba(13, 18, 36, 0.9) 100%);
+}
+
+.ashta-predict-card.card-longevity {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1) 0%, rgba(13, 18, 36, 0.9) 100%);
+}
+
+.ashta-predict-header {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.45rem;
+}
+
+.ashta-predict-body {
+  font-size: 0.76rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.ashta-badge-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   SUKRA ASHTAKAVARGA MARRIAGE TIMING RULE (சுக்கிரன் திருமண கால நிர்ணயம்)
+   ========================================================================== */
+
+.ashta-marriage-card {
+  background: radial-gradient(ellipse at top left, #1d1738 0%, #0d1124 70%, #090c1a 100%);
+  border: 1px solid rgba(244, 114, 182, 0.4);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45), 0 0 18px rgba(244, 114, 182, 0.12);
+  margin-top: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ashta-marriage-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ec4899, #ffd700, #38bdf8);
+}
+
+.ashta-marriage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(244, 114, 182, 0.2);
+}
+
+.ashta-marriage-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ashta-marriage-icon {
+  font-size: 1.8rem;
+  background: rgba(244, 114, 182, 0.15);
+  border: 1px solid rgba(244, 114, 182, 0.4);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(244, 114, 182, 0.25);
+}
+
+.ashta-marriage-title-text {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #f472b6;
+  margin: 0;
+}
+
+.ashta-marriage-subtitle {
+  font-size: 0.76rem;
+  color: #cbd5e1;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.ashta-marriage-mode-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ashta-marriage-mode-btn {
+  background: rgba(13, 18, 36, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  padding: 0.38rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ashta-marriage-mode-btn:hover {
+  border-color: #f472b6;
+  background: rgba(244, 114, 182, 0.15);
+  color: #fff;
+}
+
+.ashta-marriage-mode-btn.active {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3) 0%, rgba(212, 175, 55, 0.35) 100%);
+  border-color: #ffd700;
+  color: #ffd700;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+/* 5-Box Step Equation Grid */
+.ashta-marriage-equation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 1.25rem 0;
+  padding: 1rem 0.5rem;
+  background: rgba(8, 12, 26, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.ashta-m-box {
+  background: rgba(18, 24, 48, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  text-align: center;
+  min-width: 110px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.ashta-m-box.final {
+  border-color: #ffd700;
+  background: radial-gradient(circle at center, rgba(212, 175, 55, 0.2) 0%, rgba(18, 24, 48, 0.9) 100%);
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.25);
+}
+
+.ashta-m-label {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.ashta-m-val {
+  font-size: 1.22rem;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+.ashta-m-sign {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffd700;
+}
+
+/* Target Star Banner */
+.ashta-target-star-banner {
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.15) 0%, rgba(212, 175, 55, 0.15) 50%, rgba(56, 189, 248, 0.15) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.ashta-star-hero {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.ashta-star-number-badge {
+  background: #ffd700;
+  color: #000;
+  font-weight: 900;
+  font-size: 1.2rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+}
+
+.ashta-star-name-tamil {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.ashta-star-lord-text {
+  font-size: 0.78rem;
+  color: #ffd700;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.ashta-paksha-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ashta-paksha-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ashta-paksha-btn.active {
+  background: #38bdf8;
+  color: #000;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+/* 3 Trinal Nakshatras Showcase Grid */
+.ashta-trine-stars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.85rem;
+  margin: 1.15rem 0;
+}
+
+.ashta-trine-star-card {
+  background: rgba(14, 19, 39, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ashta-trine-star-card:hover {
+  transform: translateY(-2px);
+  border-color: #ffd700;
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.2);
+}
+
+.ashta-trine-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ashta-trine-star-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ashta-trine-star-num {
+  font-size: 0.72rem;
+  background: rgba(212, 175, 55, 0.2);
+  color: #ffd700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.ashta-trine-star-body {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.ashta-trine-rasis-tag {
+  color: #38bdf8;
+  font-weight: 700;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Jupiter Transit Timeline Table */
+.ashta-guru-transit-box {
+  background: rgba(9, 13, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.9rem;
+  margin-top: 1rem;
+}
+
+.ashta-guru-transit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.65rem;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ashta-guru-transit-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #ffd700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ashta-guru-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.ashta-guru-table th,
+.ashta-guru-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ashta-guru-table th {
+  color: #94a3b8;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.ashta-guru-row.current-transit {
+  background: rgba(16, 185, 129, 0.12);
+  border-left: 3px solid #10b981;
+}
+
+.ashta-guru-row.direct-transit {
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.ashta-transit-badge-direct {
+  background: rgba(212, 175, 55, 0.25);
+  color: #ffd700;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.ashta-transit-badge-aspect {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.ashta-transit-badge-seventh {
+  background: rgba(244, 114, 182, 0.25);
+  color: #f472b6;
+  border: 1px solid rgba(244, 114, 182, 0.4);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.ashta-transit-badge-saturn {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.ashta-transit-badge-relief {
+  background: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+/* 6 Shodhya Life Event Navigation Tabs Bar */
+.ashta-event-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ashta-event-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ashta-event-tab-btn:hover {
+  color: #fff;
+  border-color: #ffd700;
+  background: rgba(212, 175, 55, 0.15);
+  transform: translateY(-1px);
+}
+
+.ashta-event-tab-btn.active {
+  color: #000;
+  background: linear-gradient(135deg, #ffd700 0%, #f59e0b 100%);
+  border-color: #ffd700;
+  font-weight: 800;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.4);
+}
+
+.ashta-event-tab-icon {
+  font-size: 1rem;
+}
+
