@@ -307,7 +307,7 @@ window.PGAstro = window.PGAstro || {};
 
   // Engine Active State
   let activePlanet = "Mars"; // Defaults to Mars as in user whiteboard
-  let activeMethod = "board"; // 'board' (Thanikasalam / MUMTI) vs 'classical' (Parashara)
+  let activeMethod = "board"; // 'board' (Hari Method) vs 'classical' (Parashara)
   let customNativePositions = null;
   let isBirthFormOpen = true; // Birth Chart Calculator card visible by default
 
@@ -1209,13 +1209,11 @@ window.PGAstro = window.PGAstro || {};
             ${PLANET_KEYS.map(pk => {
               const m = PLANET_META[pk];
               const isActive = activePlanet === pk;
-              const isBoardDemo = pk === "Mars";
               return `
                 <button class="ashta-planet-btn ${isActive ? 'active' : ''}" data-planet="${pk}">
                   <span>${m.icon}</span>
                   <span>${m.tamil}</span>
                   <span class="badge-pill-pts">${m.pts}</span>
-                  ${isBoardDemo ? '<span style="font-size:0.65rem; background:rgba(212,175,55,0.4); padding:0 4px; border-radius:4px; margin-left:2px;">போர்டு</span>' : ''}
                 </button>
               `;
             }).join('')}
@@ -1232,7 +1230,7 @@ window.PGAstro = window.PGAstro || {};
               <span style="font-size:0.78rem; color:var(--gold-light); font-weight:600;">சோதனை முறை (Method):</span>
               <div class="ashta-method-switch">
                 <button class="ashta-method-btn ${activeMethod === 'board' ? 'active' : ''}" data-method="board">
-                  🏫 தணிகாசலம் முறை (Whiteboard)
+                  🏫 ஹரி முறை (Hari)
                 </button>
                 <button class="ashta-method-btn ${activeMethod === 'classical' ? 'active' : ''}" data-method="classical">
                   📜 பராசரர் முறை (Classical)
@@ -1342,7 +1340,7 @@ window.PGAstro = window.PGAstro || {};
 
           <p style="font-size:0.8rem; color:#94a3b8; max-width:680px; margin:0 auto; line-height:1.5;">
             ${activeMethod === 'board'
-              ? `வகுப்பு போர்டு முறைப்படி: <strong>ஆதிப்பரல்</strong> பெருக்கல் மூலம் இராசி பிண்டம் (<strong>${suite.rasiPindam.total}</strong>) மற்றும் <strong>ஏகாதிபத்திய சோதனை பரல்</strong> மூலம் கிரக பிண்டம் (<strong>${suite.grahaPindam.total}</strong>) கூட்டப்பட்டு சோத்திய பிண்டம் <strong>${suite.shodhyaPindam}</strong> ஆகப் பெறப்படுகிறது.`
+              ? `ஹரி முறைப்படி: <strong>ஆதிப்பரல்</strong> பெருக்கல் மூலம் இராசி பிண்டம் (<strong>${suite.rasiPindam.total}</strong>) மற்றும் <strong>ஏகாதிபத்திய சோதனை பரல்</strong> மூலம் கிரக பிண்டம் (<strong>${suite.grahaPindam.total}</strong>) கூட்டப்பட்டு சோத்திய பிண்டம் <strong>${suite.shodhyaPindam}</strong> ஆகப் பெறப்படுகிறது.`
               : `பாரம்பரிய பராசரர் முறைப்படி: திரிகோண & ஏகாதிபத்திய சோதனைகளுக்குப் பின் எஞ்சிய பரல்களைக் கொண்டு இராசி பிண்டம் (${suite.rasiPindam.total}) மற்றும் கிரக பிண்டம் (${suite.grahaPindam.total}) கணிக்கப்பட்டு சோத்திய பிண்டம் ${suite.shodhyaPindam} ஆகப் பெறப்படுகிறது.`
             }
           </p>
