@@ -776,30 +776,6 @@ window.PGAstroUI = window.PGAstroUI || {};
       </div>
     `;
 
-    // Real Case Study Horoscope
-    if (subData.caseStudy) {
-      const cs = subData.caseStudy;
-      html += `
-        <div class="cosmic-card" style="padding:1.25rem; margin-top:1.5rem; border:1px solid rgba(212,175,55,0.25);">
-          <h3 style="color:var(--gold-primary); font-size:1.15rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
-            <span>📋</span> ${cs.title}
-          </h3>
-          <div style="background:rgba(255,255,255,0.02); padding:0.85rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.88rem;">
-            <p style="margin:0 0 0.35rem 0;"><strong style="color:var(--gold-light);">அன்பர்:</strong> ${cs.nativeName} | <strong style="color:var(--gold-light);">பிறந்த தேதி & நேரம்:</strong> ${cs.dob} ${cs.time} | <strong style="color:var(--gold-light);">இடம்:</strong> ${cs.place}</p>
-            <p style="margin:0;"><strong style="color:var(--gold-light);">லக்னம்:</strong> ${cs.lagna} | <strong style="color:var(--gold-light);">ராசி:</strong> ${cs.rasi}</p>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:0.75rem;">
-      `;
-      cs.keyPoints.forEach(kp => {
-        html += `
-          <div style="border-left:3px solid var(--gold-primary); padding-left:0.75rem;">
-            <strong style="color:var(--gold-light); font-size:0.9rem;">${kp.label}:</strong>
-            <p style="font-size:0.86rem; color:var(--text-main); margin:0.25rem 0 0 0; line-height:1.6;">${kp.detail}</p>
-          </div>
-        `;
-      });
-      html += `</div></div>`;
-    }
 
     container.innerHTML = html;
   }
