@@ -313,7 +313,7 @@ window.PGAstro = window.PGAstro || {};
 
   // Ashtakavarga Life Events Timing System State
   let activeShodhyaEvent = "marriage"; // 'marriage' | 'status' | 'business' | 'education_job' | 'child' | 'debt'
-  let shodhyaEventMode = "classroom";  // 'classroom' | 'current' | 'custom'
+  let shodhyaEventMode = "current";    // 'current' | 'classroom' | 'custom'
   let customEventParams = {
     marriage: { planetRasi: 2, houseParal: 4, shodhyaPindam: 174, paksha: "valarpirai" },
     status: { planetRasi: 12, houseParal: 3, shodhyaPindam: 485, paksha: "valarpirai" },
@@ -325,30 +325,30 @@ window.PGAstro = window.PGAstro || {};
   let isEventCustomOpen = false;
 
   // Backward compatibility aliases
-  let sukraMarriageMode = "classroom";
+  let sukraMarriageMode = "current";
   let customSukraParams = customEventParams.marriage;
   let isSukraCustomOpen = false;
 
-  // Classroom default whiteboard chart (3-4-1977 07:27 AM Karur)
-  const WHITEBOARD_CHART = {
+  // Default initial planetary positions (Aligned with Wealth & Fortune Preset: Leo Lagna, Saturn+Venus in Meena)
+  const DEFAULT_CHART = {
     nativeInfo: {
-      name: "பயிற்சி வகுப்பு ஜாதகர்",
+      name: "அன்பர் (Native)",
       gender: "male",
-      dob: "1977-04-03",
-      time: "07:27",
-      place: "கரூர் (Karur)"
+      dob: "1988-04-30",
+      time: "22:10",
+      place: "திருவண்ணாமலை (Tiruvannamalai)"
     },
     positions: {
-      Sun: 12,      // மீனம்
-      Moon: 6,      // கன்னி
-      Mars: 11,     // கும்பம்
-      Mercury: 1,   // மேஷம்
-      Jupiter: 2,   // ரிஷபம்
-      Venus: 12,    // மீனம்
-      Saturn: 4,    // கடகம்
-      Lagna: 1,     // மேஷம்
-      Rahu: 7,      // துலாம்
-      Ketu: 1       // மேஷம்
+      Sun: 5,       // சிம்மம்
+      Moon: 2,      // ரிஷபம் (உச்சம்)
+      Mars: 1,      // மேஷம் (ஆட்சி)
+      Mercury: 5,   // சிம்மம்
+      Jupiter: 4,   // கடகம் (உச்சம்)
+      Venus: 12,    // மீனம் (உச்சம்)
+      Saturn: 12,   // மீனம்
+      Lagna: 5,     // சிம்மம்
+      Rahu: 3,      // மிதுனம்
+      Ketu: 9       // தனுசு
     }
   };
 
@@ -395,7 +395,7 @@ window.PGAstro = window.PGAstro || {};
     });
 
     if (missingCount >= 4) {
-      return WHITEBOARD_CHART.positions;
+      return DEFAULT_CHART.positions;
     }
 
     return pos;
@@ -1766,11 +1766,11 @@ window.PGAstro = window.PGAstro || {};
     let placeKey = pSel?.value;
     let customPlace = pCust?.value || fromChart?.place;
 
-    if (!dob) dob = "1977-04-03";
-    if (!time) time = "07:27";
-    if (!name) name = "பயிற்சி வகுப்பு ஜாதகர்";
+    if (!dob) dob = "1988-04-30";
+    if (!time) time = "12:00";
+    if (!name) name = "";
     if (!gender) gender = "male";
-    if (!placeKey) placeKey = "karur";
+    if (!placeKey) placeKey = "tiruvannamalai";
 
     return { name, gender, dob, time, placeKey, customPlace };
   }
@@ -1780,7 +1780,6 @@ window.PGAstro = window.PGAstro || {};
    */
   function renderCityOptions(selectedKey) {
     const cities = window.PGAstro?.astronomy?.CITIES || {
-      "karur": { name: "கரூர் (Karur)" },
       "tiruvannamalai": { name: "திருவண்ணாமலை (Tiruvannamalai)" },
       "chennai": { name: "சென்னை (Chennai)" },
       "madurai": { name: "மதுரை (Madurai)" },
@@ -1788,13 +1787,14 @@ window.PGAstro = window.PGAstro || {};
       "trichy": { name: "திருச்சி (Tiruchirappalli)" },
       "salem": { name: "சேலம் (Salem)" },
       "tiruppur": { name: "திருப்பூர் (Tiruppur)" },
-      "erode": { name: "ஈரோடு (Erode)" }
+      "erode": { name: "ஈரோடு (Erode)" },
+      "karur": { name: "கரூர் (Karur)" }
     };
 
     let html = `<option value="">-- பிறந்த இடம் தேர்வு செய்யவும் (Select Place) --</option>`;
     for (let k in cities) {
       const c = cities[k];
-      const isSel = (k === selectedKey || (!selectedKey && k === "karur")) ? "selected" : "";
+      const isSel = (k === selectedKey || (!selectedKey && k === "tiruvannamalai")) ? "selected" : "";
       html += `<option value="${k}" ${isSel}>${c.name}</option>`;
     }
     return html;
@@ -1853,9 +1853,6 @@ window.PGAstro = window.PGAstro || {};
           </button>
           <button class="btn btn-outline-gold" id="btnAshtaSetCurrentNow" style="font-size: 0.8rem;">
             <span>⏱️</span> தற்போதைய நேரம் (Current Now)
-          </button>
-          <button class="btn btn-secondary" id="btnAshtaFillBoardSample" style="font-size: 0.8rem;">
-            <span>🎯</span> 3-4-1977 கரூர் மாதிரி
           </button>
         </div>
       </div>
@@ -1993,21 +1990,6 @@ window.PGAstro = window.PGAstro || {};
       });
     }
 
-    // Fill 3-4-1977 Karur Sample
-    const fillSampleBtn = container.querySelector("#btnAshtaFillBoardSample");
-    if (fillSampleBtn) {
-      fillSampleBtn.addEventListener("click", () => {
-        const dInput = container.querySelector("#ashtaBirthDate");
-        const tInput = container.querySelector("#ashtaBirthTime");
-        const nInput = container.querySelector("#ashtaBirthName");
-        const pSel = container.querySelector("#ashtaBirthPlaceSelect");
-        if (dInput) dInput.value = "1977-04-03";
-        if (tInput) tInput.value = "07:27";
-        if (nInput) nInput.value = "பயிற்சி வகுப்பு ஜாதகர்";
-        if (pSel) pSel.value = "karur";
-        executeAshtaBirthCalculation();
-      });
-    }
 
     // 6 Shodhya Life Event Selection Tabs
     container.querySelectorAll(".ashta-event-tab-btn").forEach(btn => {
@@ -2118,35 +2100,13 @@ window.PGAstro = window.PGAstro || {};
   }
 
   /**
-   * Loads the exact whiteboard chart: 3-4-1977 07:27 AM Karur into system
+   * Resets Ashtakavarga to live current chart
    */
   function loadWhiteboardSample() {
     activePlanet = "Mars";
     activeMethod = "board";
-    customNativePositions = WHITEBOARD_CHART.positions;
-
-    // Also populate birth calculation inputs if they exist
-    const dInput = document.getElementById("birthCalcDate");
-    const tInput = document.getElementById("birthCalcTime");
-    const nInput = document.getElementById("birthCalcName");
-    const pSel = document.getElementById("birthCalcPlaceSelect");
-
-    if (dInput) dInput.value = WHITEBOARD_CHART.nativeInfo.dob;
-    if (tInput) tInput.value = WHITEBOARD_CHART.nativeInfo.time;
-    if (nInput) nInput.value = WHITEBOARD_CHART.nativeInfo.name;
-    if (pSel) pSel.value = "karur";
-
-    // Set into main chart as well if available
-    if (window.PGAstro && window.PGAstro.chart && window.PGAstro.astronomy) {
-      const computed = window.PGAstro.astronomy.calculateSiderealPlanets("1977-04-03", "07:27", 10.9601, 78.0766);
-      window.PGAstro.chart.setBirthHoroscope(computed, WHITEBOARD_CHART.nativeInfo);
-    }
-
+    customNativePositions = null;
     render();
-
-    if (window.PGAstroUI && window.PGAstroUI.showToast) {
-      window.PGAstroUI.showToast("🎯 வகுப்பு மாதிரி ஜாதகம் (3-4-1977 கரூர்) வெற்றிகரமாக ஏற்றப்பட்டது!");
-    }
   }
 
   // Public API
@@ -2172,7 +2132,7 @@ window.PGAstro = window.PGAstro || {};
     NAKSHATRA_DATA,
     SHODHYA_EVENT_CONFIGS,
     SATURN_TRANSITS_CYCLE,
-    WHITEBOARD_CHART
+    DEFAULT_CHART
   };
 
 })();
