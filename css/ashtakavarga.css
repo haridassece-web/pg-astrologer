@@ -578,6 +578,11 @@
   background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1) 0%, rgba(13, 18, 36, 0.9) 100%);
 }
 
+.ashta-predict-card.card-property {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.12) 0%, rgba(13, 18, 36, 0.9) 100%);
+}
+
 .ashta-predict-header {
   font-size: 0.88rem;
   font-weight: 700;

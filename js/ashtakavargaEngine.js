@@ -302,17 +302,31 @@ window.PGAstro = window.PGAstro || {};
       shastraRule: "சனிக்கு 6-ஆம் வீட்டு ஆதிப்பரல் × சனியின் சோத்திய பிண்டம் ÷ 27 ➔ மீதி நட்சத்திரம் & கடன் தாக்கம்/நிவர்த்தி காலம்.",
       resultNote: "கோச்சார சனி இந்நடசத்திரங்கள் வழியே சஞ்சரிக்கும் போது கடன் சுமை, எச்சரிக்கை தேவை; அதே நேரம் கோச்சார குரு சஞ்சரிக்கும் போது கடன்கள் முழுமையாகத் தீரும் விமோசன காலம்!",
       defaultClassroom: { planetRasi: 4, houseParal: 4, shodhyaPindam: 351, paksha: "valarpirai" }
+    },
+    property: {
+      id: "property",
+      icon: "🏡",
+      title: "வீடு கட்டும் யோகம் & பூமி பாக்கியம் (House Construction & Property)",
+      shortLabel: "🏡 வீடு யோகம் (செவ்வாய் ➔ 4)",
+      planetKey: "Mars",
+      planetTamil: "செவ்வாய்",
+      houseOffset: 4,
+      houseName: "கிருஹ/பூமி ஸ்தானம் (4-ஆம் வீடு)",
+      transitFocus: "Jupiter",
+      shastraRule: "செவ்வாய்க்கு 4-ஆம் வீட்டு ஆதிப்பரல் × செவ்வாயின் சோத்திய பிண்டம் ÷ 27 ➔ மீதி நட்சத்திரம் & வீடு கட்டும் சுப கால நிர்ணயம்.",
+      resultNote: "கோச்சார குரு பகவான் இந்நடசத்திரங்கள் வழியே அல்லது செவ்வாய்க்கு 4-ஆம் வீட்டில் சஞ்சரிக்கும் அல்லது பார்க்கும் போது புதிய மனை வாங்குதல், அஸ்திவாரம் போடுதல், சொந்த வீடு கட்டி கிரகப்பிரவேசம் செய்தல் கைகூடும்!",
+      defaultClassroom: { planetRasi: 11, houseParal: 3, shodhyaPindam: 412, paksha: "valarpirai" }
     }
   };
 
   // Engine Active State
   let activePlanet = "Mars"; // Defaults to Mars as in user whiteboard
-  let activeMethod = "board"; // 'board' (Hari Method) vs 'classical' (Parashara)
+  let activeMethod = "board"; // 'board' (Guru Method) vs 'classical' (Parashara)
   let customNativePositions = null;
   let isBirthFormOpen = true; // Birth Chart Calculator card visible by default
 
   // Ashtakavarga Life Events Timing System State
-  let activeShodhyaEvent = "marriage"; // 'marriage' | 'status' | 'business' | 'education_job' | 'child' | 'debt'
+  let activeShodhyaEvent = "marriage"; // 'marriage' | 'status' | 'business' | 'education_job' | 'child' | 'debt' | 'property'
   let shodhyaEventMode = "current";    // 'current' | 'classroom' | 'custom'
   let customEventParams = {
     marriage: { planetRasi: 2, houseParal: 4, shodhyaPindam: 174, paksha: "valarpirai" },
@@ -320,7 +334,8 @@ window.PGAstro = window.PGAstro || {};
     business: { planetRasi: 4, houseParal: 4, shodhyaPindam: 351, paksha: "valarpirai" },
     education_job: { planetRasi: 1, houseParal: 4, shodhyaPindam: 592, paksha: "valarpirai" },
     child: { planetRasi: 2, houseParal: 5, shodhyaPindam: 605, paksha: "valarpirai" },
-    debt: { planetRasi: 4, houseParal: 4, shodhyaPindam: 351, paksha: "valarpirai" }
+    debt: { planetRasi: 4, houseParal: 4, shodhyaPindam: 351, paksha: "valarpirai" },
+    property: { planetRasi: 11, houseParal: 3, shodhyaPindam: 412, paksha: "valarpirai" }
   };
   let isEventCustomOpen = false;
 
@@ -653,6 +668,44 @@ window.PGAstro = window.PGAstro || {};
     const caution1 = ((pindaRasiId - 1 + 6) % 12) + 1;
     const caution2 = ((pindaRasiId - 1 + 7) % 12) + 1;
 
+    // Property / Veedu Katta Yogam calculation for Mars (4th house from Mars & 4th house from Lagna)
+    let propertyYoga = null;
+    if (suite.planetKey === "Mars" && suite.aadhiParal) {
+      const positions = getCurrentPositions();
+      const marsRasi = positions.Mars || 1;
+      const target4thRasi = ((marsRasi - 1 + 3) % 12) + 1;
+      const paralIn4th = suite.aadhiParal[target4thRasi] !== undefined ? suite.aadhiParal[target4thRasi] : 0;
+      
+      let strengthLevel = "medium";
+      let strengthText = "நடுத்தர பூமி யோகம்";
+      let strengthDesc = `செவ்வாய்க்கு 4-ஆம் வீடான ${RASI_NAMES_TAMIL[target4thRasi]}-ல் ${paralIn4th} ஆதிப்பரல்கள் உள்ளன. விடாமுயற்சி மற்றும் உழைப்பின் மூலம் சொந்த வீடு, நிலம் வாங்கும் யோகம் கைகூடும்.`;
+      let badgeCol = "#ffd700";
+
+      if (paralIn4th >= 5) {
+        strengthLevel = "strong";
+        strengthText = "வலுவான பூமி யோகம் (உன்னதம்)";
+        strengthDesc = `செவ்வாய்க்கு 4-ஆம் வீடான ${RASI_NAMES_TAMIL[target4thRasi]}-ல் ${paralIn4th} பரல்கள் (5+) அமைந்துள்ளதால் மிகச் சிறந்த பூமி யோகம்! சுலபமாக மனை வாங்குதல், சொந்தமாக அஸ்திவாரம் அமைத்து வீடு கட்டி கிரகப்பிரவேசம் செய்யும் யோகம் உண்டாகும்!`;
+        badgeCol = "#34d399";
+      } else if (paralIn4th <= 3) {
+        strengthLevel = "low";
+        strengthText = "தடைகள் / தாமத யோகம்";
+        strengthDesc = `செவ்வாய்க்கு 4-ஆம் வீடான ${RASI_NAMES_TAMIL[target4thRasi]}-ல் ${paralIn4th} பரல்கள் மட்டுமே உள்ளதால், நிலம்/மனை வாங்கும் போது பத்திர வில்லங்கம், எல்லைத் தகராறு அல்லது வீடு கட்டும் போது பணியாளர்களால் இழுபறி ஏற்பட வாய்ப்புண்டு; கவனமுடன் திட்டமிடவும்.`;
+        badgeCol = "#fca5a5";
+      }
+
+      propertyYoga = {
+        marsRasi,
+        marsRasiName: RASI_NAMES_TAMIL[marsRasi],
+        target4thRasi,
+        target4thRasiName: RASI_NAMES_TAMIL[target4thRasi],
+        paralIn4th,
+        strengthLevel,
+        strengthText,
+        strengthDesc,
+        badgeCol
+      };
+    }
+
     return {
       longevityYears: longevityNum,
       targetNakshatraId: remainderNak,
@@ -660,12 +713,13 @@ window.PGAstro = window.PGAstro || {};
       pindaRasiId,
       trineRasis: [RASI_NAMES_TAMIL[pindaRasiId], RASI_NAMES_TAMIL[trine1], RASI_NAMES_TAMIL[trine2]],
       cautionRasis: [RASI_NAMES_TAMIL[caution1], RASI_NAMES_TAMIL[caution2]],
-      planetName: pMeta.tamil
+      planetName: pMeta.tamil,
+      propertyYoga
     };
   }
 
   /**
-   * 6 Classical Ashtakavarga Shodhya Pinda Life Event Timing Rules
+   * 7 Classical Ashtakavarga Shodhya Pinda Life Event Timing Rules
    * (அஷ்டகவர்க்க சோத்திய பிண்ட முக்கிய வாழ்க்கை நிகழ்வுகள் & கால நிர்ணய விதிகள்)
    *
    * 1. திருமணம் (Marriage): சுக்கிரன் -> 7-ஆம் வீடு ஆதிப்பரல் × சுக்கிர சோத்திய பிண்டம்
@@ -674,6 +728,7 @@ window.PGAstro = window.PGAstro || {};
    * 4. கல்வி & வேலை (Education & Job): புதன் -> 2-ஆம் வீடு ஆதிப்பரல் × புதன் சோத்திய பிண்டம்
    * 5. புத்திர பாக்கியம் (Childbirth): குரு -> 5-ஆம் வீடு ஆதிப்பரல் × குரு சோத்திய பிண்டம்
    * 6. கடன் & ருணம் (Debts): சனி -> 6-ஆம் வீடு ஆதிப்பரல் × சனி சோத்திய பிண்டம்
+   * 7. வீடு & பூமி யோகம் (House & Land Property): செவ்வாய் -> 4-ஆம் வீடு ஆதிப்பரல் × செவ்வாய் சோத்திய பிண்டம்
    *
    * Formula: (Planet Relative House Paral * Shodhya Pindam) % 27
    * Paksha Logic:
@@ -1149,7 +1204,7 @@ window.PGAstro = window.PGAstro || {};
               அஷ்டகவர்க்கம் &amp; சோத்திய பிண்டம் - Paid User &amp; Admin Only
             </h2>
             <p style="color: var(--text-muted); max-width: 620px; margin: 0 auto 1.5rem; font-size: 0.92rem; line-height: 1.6;">
-              ஆதிப்பரல், திரிகோண/ஏகாதிபத்திய சோதனை, இராசி/கிரக பிண்டம், சர்வாஷ்டகவர்க்கம் (SAV 337) மற்றும் <strong>6 வாழ்க்கை நிகழ்வுகளுக்கான சோத்திய பிண்ட கால நிர்ணய விதிகள் (திருமணம், பதவி, தொழில், கல்வி, புத்திர பாக்கியம், கடன்)</strong> ஆகியவற்றை அணுக <strong>Paid User</strong> அல்லது <strong>Admin</strong> கணக்கு அவசியமாகும்.
+              ஆதிப்பரல், திரிகோண/ஏகாதிபத்திய சோதனை, இராசி/கிரக பிண்டம், சர்வாஷ்டகவர்க்கம் (SAV 337) மற்றும் <strong>7 வாழ்க்கை நிகழ்வுகளுக்கான சோத்திய பிண்ட கால நிர்ணய விதிகள் (திருமணம், பதவி, தொழில், கல்வி, புத்திர பாக்கியம், கடன், வீடு யோகம்)</strong> ஆகியவற்றை அணுக <strong>Paid User</strong> அல்லது <strong>Admin</strong> கணக்கு அவசியமாகும்.
             </p>
             <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; align-items: center;">
               <button class="btn btn-gold" onclick="window.PGAstroAuth.showAccessModal('ashtakavarga')">
@@ -1230,7 +1285,7 @@ window.PGAstro = window.PGAstro || {};
               <span style="font-size:0.78rem; color:var(--gold-light); font-weight:600;">சோதனை முறை (Method):</span>
               <div class="ashta-method-switch">
                 <button class="ashta-method-btn ${activeMethod === 'board' ? 'active' : ''}" data-method="board">
-                  🏫 ஹரி முறை (Hari)
+                  🏫 குரு முறை (Guru)
                 </button>
                 <button class="ashta-method-btn ${activeMethod === 'classical' ? 'active' : ''}" data-method="classical">
                   📜 பராசரர் முறை (Classical)
@@ -1340,7 +1395,7 @@ window.PGAstro = window.PGAstro || {};
 
           <p style="font-size:0.8rem; color:#94a3b8; max-width:680px; margin:0 auto; line-height:1.5;">
             ${activeMethod === 'board'
-              ? `ஹரி முறைப்படி: <strong>ஆதிப்பரல்</strong> பெருக்கல் மூலம் இராசி பிண்டம் (<strong>${suite.rasiPindam.total}</strong>) மற்றும் <strong>ஏகாதிபத்திய சோதனை பரல்</strong> மூலம் கிரக பிண்டம் (<strong>${suite.grahaPindam.total}</strong>) கூட்டப்பட்டு சோத்திய பிண்டம் <strong>${suite.shodhyaPindam}</strong> ஆகப் பெறப்படுகிறது.`
+              ? `குரு முறைப்படி: <strong>ஆதிப்பரல்</strong> பெருக்கல் மூலம் இராசி பிண்டம் (<strong>${suite.rasiPindam.total}</strong>) மற்றும் <strong>ஏகாதிபத்திய சோதனை பரல்</strong> மூலம் கிரக பிண்டம் (<strong>${suite.grahaPindam.total}</strong>) கூட்டப்பட்டு சோத்திய பிண்டம் <strong>${suite.shodhyaPindam}</strong> ஆகப் பெறப்படுகிறது.`
               : `பாரம்பரிய பராசரர் முறைப்படி: திரிகோண & ஏகாதிபத்திய சோதனைகளுக்குப் பின் எஞ்சிய பரல்களைக் கொண்டு இராசி பிண்டம் (${suite.rasiPindam.total}) மற்றும் கிரக பிண்டம் (${suite.grahaPindam.total}) கணிக்கப்பட்டு சோத்திய பிண்டம் ${suite.shodhyaPindam} ஆகப் பெறப்படுகிறது.`
             }
           </p>
@@ -1526,6 +1581,38 @@ window.PGAstro = window.PGAstro || {};
               இந்ராசிகளில் கோச்சார சனி சஞ்சரிக்கும் காலத்தில் உடல் ஆரோக்கியம், தொழில் முதலீடுகள் மற்றும் பயணங்களில் விழிப்புணர்வுடன் இருத்தல் நலம்.
             </div>
           </div>
+
+          <!-- Card 4: Mars 4th House Property Yoga (வீடு கட்டும் யோகம்) -->
+          ${pred.propertyYoga ? `
+            <div class="ashta-predict-card card-property">
+              <div class="ashta-predict-header" style="color: #ffd700;">
+                <span style="font-size:1.1rem;">🏡</span>
+                <span>வீடு கட்டும் யோகம் (செவ்வாய் ➔ 4-ஆம் வீடு)</span>
+              </div>
+              <div class="ashta-predict-body">
+                <div>
+                  செவ்வாய் நின்ற ராசி: <strong>${pred.propertyYoga.marsRasiName}</strong> ➔ 4-ஆம் வீடு: <strong>${pred.propertyYoga.target4thRasiName}</strong>
+                </div>
+                <div style="margin: 6px 0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+                  <span style="font-size:0.75rem; color:#94a3b8;">4-ஆம் வீட்டு ஆதிப்பரல்:</span>
+                  <span class="ashta-badge-tag" style="background:rgba(212,175,55,0.25); color:#ffd700; font-size:0.95rem; font-weight:800; border:1px solid #ffd700;">
+                    ${pred.propertyYoga.paralIn4th} பரல்கள்
+                  </span>
+                  <span class="ashta-badge-tag" style="background:rgba(255,255,255,0.08); color:${pred.propertyYoga.badgeCol}; border:1px solid ${pred.propertyYoga.badgeCol}; font-weight:700;">
+                    ${pred.propertyYoga.strengthText}
+                  </span>
+                </div>
+                <div style="font-size:0.75rem; color:#cbd5e1; line-height:1.45; margin-top:4px;">
+                  ${pred.propertyYoga.strengthDesc}
+                </div>
+                <div style="margin-top:0.7rem;">
+                  <button class="btn btn-gold btn-sm ashta-quick-event-btn" data-event="property" style="padding:4px 10px; font-size:0.72rem; width:100%; justify-content:center; font-weight:700;">
+                    🎯 வீடு கட்டும் சுப கால நிர்ணயத்தைக் காண்க ➔
+                  </button>
+                </div>
+              </div>
+            </div>
+          ` : ''}
 
         </div>
 
@@ -1989,7 +2076,7 @@ window.PGAstro = window.PGAstro || {};
     }
 
 
-    // 6 Shodhya Life Event Selection Tabs
+    // 7 Shodhya Life Event Selection Tabs
     container.querySelectorAll(".ashta-event-tab-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const ev = btn.dataset.event;
@@ -2000,6 +2087,26 @@ window.PGAstro = window.PGAstro || {};
           const cfg = SHODHYA_EVENT_CONFIGS[ev];
           if (window.PGAstroUI && window.PGAstroUI.showToast) {
             window.PGAstroUI.showToast(`${cfg.icon} ${cfg.title} கணக்கீடு திரைக்கு கொண்டுவரப்பட்டது!`);
+          }
+        }
+      });
+    });
+
+    // Quick Event jump button from prediction cards
+    container.querySelectorAll(".ashta-quick-event-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const ev = btn.dataset.event;
+        if (ev && SHODHYA_EVENT_CONFIGS[ev]) {
+          activeShodhyaEvent = ev;
+          isEventCustomOpen = false;
+          render();
+          const targetCard = document.getElementById("ashtaShodhyaEventsCard");
+          if (targetCard) {
+            targetCard.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+          const cfg = SHODHYA_EVENT_CONFIGS[ev];
+          if (window.PGAstroUI && window.PGAstroUI.showToast) {
+            window.PGAstroUI.showToast(`${cfg.icon} ${cfg.title} கால நிர்ணய அட்டவணை திறக்கப்பட்டது!`);
           }
         }
       });
